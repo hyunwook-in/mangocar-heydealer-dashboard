@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>헤이딜러 매입 후보</title>
+<meta name="description" content="망고카 최근 2개월 매입 데이터 기반, 헤이딜러 유사 매물 자동 추천 (매일 아침 갱신)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root{
+    color-scheme: light;
+    --bg:#f6f4ef;
+    --surface:#ffffff;
+    --surface-alt:#efeae0;
+    --border:#e2dccd;
+    --text:#211d17;
+    --text-muted:#75705f;
+    --accent:#2d3a5c;
+    --accent-soft:#e4e8f2;
+    --accent-ink:#ffffff;
+    --good:#396b4c;
+    --good-soft:#dfeee3;
+    --warn:#93641d;
+    --warn-soft:#f5e8cd;
+    --bad:#9a3f36;
+    --bad-soft:#f6e0dc;
+    --shadow: 0 1px 2px rgba(33,29,23,0.04), 0 8px 24px -12px rgba(33,29,23,0.12);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#14161b;
+      --surface:#1b1e25;
+      --surface-alt:#22252d;
+      --border:#2d313b;
+      --text:#ece9e1;
+      --text-muted:#9a978d;
+      --accent:#7688b8;
+      --accent-soft:#242c40;
+      --accent-ink:#0f1117;
+      --good:#6bbf8e;
+      --good-soft:#1c2f24;
+      --warn:#dcac52;
+      --warn-soft:#332a16;
+      --bad:#e08277;
+      --bad-soft:#33201d;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);}
+  body{
+    color:var(--text);
+    font-family:"IBM Plex Sans KR","Pretendard",-apple-system,sans-serif;
+    line-height:1.5;
+  }
+  img{max-width:100%;}
+  .num{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums;}
+  .wrap{max-width:1180px;margin:0 auto;padding:32px 24px 80px;}
+  header.top{
+    display:flex;flex-wrap:wrap;gap:16px 32px;align-items:flex-end;justify-content:space-between;
+    padding-bottom:24px;margin-bottom:24px;border-bottom:1px solid var(--border);
+  }
+  .title-block h1{
+    font-family:"Sora",sans-serif;font-weight:700;font-size:28px;letter-spacing:-0.01em;
+    margin:0 0 6px;text-wrap:balance;
+  }
+  .title-block p{margin:0;color:var(--text-muted);font-size:14px;max-width:60ch;}
+  .meta-chips{display:flex;gap:8px;flex-wrap:wrap;}
+  .chip{
+    background:var(--surface);border:1px solid var(--border);border-radius:999px;
+    padding:7px 14px;font-size:12.5px;color:var(--text-muted);display:flex;align-items:center;gap:6px;
+    box-shadow:var(--shadow);
+  }
+  .chip b{color:var(--text);font-weight:600;}
+  .chip .num{color:var(--accent);font-weight:600;}
+  .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:32px;}
+  .stat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow);}
+  .stat .label{font-size:11.5px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;}
+  .stat .value{font-family:"Sora",sans-serif;font-weight:600;font-size:22px;}
+  .stat .sub{font-size:12px;color:var(--text-muted);margin-top:2px;}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;align-items:center;margin-bottom:20px;font-size:12.5px;color:var(--text-muted);}
+  .legend .dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:6px;}
+  .legend .dot.good{background:var(--good);}
+  .legend .dot.warn{background:var(--warn);}
+  .legend .dot.bad{background:var(--bad);}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  @media (max-width:920px){.grid{grid-template-columns:repeat(2,1fr);} .stat-row{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:620px){.grid{grid-template-columns:1fr;} .stat-row{grid-template-columns:1fr 1fr;}}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow);position:relative;}
+  .card .rank{position:absolute;top:16px;right:18px;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--text-muted);}
+  .card h2{font-family:"Sora",sans-serif;font-size:17px;font-weight:600;margin:0;padding-right:28px;}
+  .card h2 .brand{color:var(--text-muted);font-weight:500;font-size:13px;display:block;margin-bottom:2px;}
+  .listing-title{font-size:13px;color:var(--text-muted);line-height:1.4;min-height:2.6em;}
+  .spec-row{display:flex;gap:6px;flex-wrap:wrap;}
+  .spec{background:var(--surface-alt);border-radius:8px;padding:4px 9px;font-size:11.5px;color:var(--text);}
+  .price-block{display:flex;justify-content:space-between;align-items:flex-end;border-top:1px dashed var(--border);padding-top:12px;margin-top:2px;}
+  .price-krw{font-family:"Sora",sans-serif;font-weight:700;font-size:20px;}
+  .price-usd{font-size:12px;color:var(--text-muted);margin-top:2px;}
+  .gap-badge{font-size:11.5px;font-weight:600;padding:4px 9px;border-radius:8px;white-space:nowrap;}
+  .gap-badge.good{background:var(--good-soft);color:var(--good);}
+  .gap-badge.warn{background:var(--warn-soft);color:var(--warn);}
+  .gap-badge.bad{background:var(--bad-soft);color:var(--bad);}
+  .note{font-size:11.5px;color:var(--text-muted);background:var(--surface-alt);border-radius:8px;padding:7px 9px;}
+  a.view-btn{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--accent);color:var(--accent-ink);text-decoration:none;font-size:13px;font-weight:600;padding:10px;border-radius:10px;margin-top:2px;transition:opacity .15s ease;}
+  a.view-btn:hover{opacity:0.88;}
+  a.view-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  .price-changed-badge{position:absolute;top:-8px;left:14px;background:var(--warn);color:var(--accent-ink);font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:999px;box-shadow:0 2px 6px rgba(0,0,0,0.2);}
+  footer{margin-top:40px;padding-top:20px;border-top:1px solid var(--border);font-size:12px;color:var(--text-muted);display:flex;flex-direction:column;gap:6px;}
+  .snapshot-note{font-size:11.5px;color:var(--text-muted);background:var(--accent-soft);border:1px solid var(--border);border-radius:10px;padding:8px 12px;margin-bottom:20px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="title-block">
+      <h1>헤이딜러 매입 후보</h1>
+      <p>망고카 최근 2개월(2026년 7~8월) 매입 데이터에서 가장 많이 거래된 20개 모델을 뽑아, 헤이딜러 재고 중 조건이 가장 근접한 매물을 자동으로 짝지었습니다.</p>
+    </div>
+    <div class="meta-chips" id="meta-chips"></div>
+  </header>
+  <div class="stat-row" id="stat-row"></div>
+  <div class="legend">
+    <span><span class="dot good"></span>헤이딜러가 매입 단가와 근접 (±15% 이내)</span>
+    <span><span class="dot warn"></span>다소 높음 (+15~60%)</span>
+    <span><span class="dot bad"></span>차이 큼 / 해당 연식·가격대 재고 부족</span>
+  </div>
+  <div class="grid" id="grid"></div>
+  <footer id="footer"></footer>
+</div>
+
+<script>
+const DATA = {
+  "generatedAt": "2026-09-07",
+  "exchangeRateKrwPerUsd": 1343.82,
+  "exchangeRateSource": "Xe.com 중간환율(mid-market rate), 2026-09-07 02:19 UTC 기준 1,343.82원/달러",
+  "items": [
+    {"brand":"현대","model":"투싼","targetPriceUsd":5715,"targetYear":2016,"fuel":"디젤","count":127,"title":"올뉴투싼 디젤 1.7 2WD 스타일","year":2016,"mileage":"14.4만km","priceKrw":7800000,"url":"https://www.heydealer.com/market/cars/VljEj3QG","note":null},
+    {"brand":"현대","model":"싼타페","targetPriceUsd":5957,"targetYear":2016,"fuel":"디젤","count":94,"title":"싼타페DM 디젤 2.0 2WD 프리미엄 5인승","year":2015,"mileage":"14.7만km","priceKrw":8300000,"url":"https://www.heydealer.com/market/cars/dnKo5ono","note":null},
+    {"brand":"아우디","model":"A6","targetPriceUsd":8228,"targetYear":2017,"fuel":"디젤","count":74,"title":"A6(C7) 3.0 TDI 콰트로","year":2013,"mileage":"13.4만km","priceKrw":8500000,"url":"https://www.heydealer.com/market/cars/qyLXBRyR","note":"예약 중 상태로 표시됨(거래 진행 중일 수 있음)","priceChanged":true,"previousPriceKrw":8600000},
+    {"brand":"벤츠","model":"E클래스","targetPriceUsd":11380,"targetYear":2017,"fuel":"디젤","count":68,"title":"E클래스(W213) E220d 익스클루시브","year":2017,"mileage":"11.4만km","priceKrw":20400000,"url":"https://www.heydealer.com/market/cars/pQPk5gn9","note":"인증매물 특성상 전 모델 가격이 매입단가보다 높게 형성"},
+    {"brand":"기아","model":"쏘렌토","targetPriceUsd":6505,"targetYear":2016,"fuel":"디젤","count":66,"title":"올뉴쏘렌토 디젤 2.0 2WD 프레스티지 7인승","year":2015,"mileage":"14.2만km","priceKrw":10150000,"url":"https://www.heydealer.com/market/cars/BQ4w8wnR","note":"기존 매물 판매완료로 신규 매물로 교체됨"},
+    {"brand":"폭스바겐","model":"티구안","targetPriceUsd":6474,"targetYear":2017,"fuel":"디젤","count":61,"title":"티구안 2세대 2.0 TDI 프리미엄","year":2018,"mileage":"13.3만km","priceKrw":15650000,"url":"https://www.heydealer.com/market/cars/NQpgX6nP","note":"구형(1세대) 매물 재고 없음"},
+    {"brand":"기아","model":"스포티지","targetPriceUsd":4663,"targetYear":2016,"fuel":"디젤","count":57,"title":"더뉴스포티지R 디젤 2WD 트렌디","year":2014,"mileage":"12.6만km","priceKrw":6900000,"url":"https://www.heydealer.com/market/cars/gQz0weyK","note":"기존 매물 판매완료로 신규 매물로 교체됨"},
+    {"brand":"BMW","model":"3시리즈","targetPriceUsd":8200,"targetYear":2017,"fuel":"디젤","count":49,"title":"3시리즈(F30) 320d ED에디션","year":2015,"mileage":"11.5만km","priceKrw":12000000,"url":"https://www.heydealer.com/market/cars/9nNx8klD","note":"기존 매물 판매완료로 신규 매물로 교체됨"},
+    {"brand":"폭스바겐","model":"골프","targetPriceUsd":4901,"targetYear":2014,"fuel":"디젤","count":46,"title":"골프 7세대 2.0 TDI 40th에디션","year":2015,"mileage":"8.6만km","priceKrw":15600000,"url":"https://www.heydealer.com/market/cars/XlX9x1yY","note":"재고 5대뿐, 저가 매물은 대부분 가솔린"},
+    {"brand":"벤츠","model":"C클래스","targetPriceUsd":8418,"targetYear":2017,"fuel":"디젤","count":44,"title":"C클래스(W205) C220d 아방가르드","year":2016,"mileage":"12.6만km","priceKrw":12600000,"url":"https://www.heydealer.com/market/cars/2yMJ48nW","note":null},
+    {"brand":"현대","model":"아반떼","targetPriceUsd":3141,"targetYear":2016,"fuel":"가솔린","count":40,"title":"아반떼 AD 1.6 GDI 스마트","year":2016,"mileage":"11.7만km","priceKrw":8400000,"url":"https://www.heydealer.com/market/cars/EQr7wblg","note":null,"priceChanged":true,"previousPriceKrw":8500000},
+    {"brand":"르노코리아(삼성)","model":"QM3","targetPriceUsd":3728,"targetYear":2016,"fuel":"디젤","count":34,"title":"QM3 LE","year":2015,"mileage":"14.7만km","priceKrw":4500000,"url":"https://www.heydealer.com/market/cars/rnYpe5yP","note":null},
+    {"brand":"BMW","model":"5시리즈","targetPriceUsd":9900,"targetYear":2016,"fuel":"디젤","count":33,"title":"5시리즈(F10) 520d xDrive M 에어로 다이나믹","year":2016,"mileage":"10.3만km","priceKrw":15350000,"url":"https://www.heydealer.com/market/cars/XlX6gmnY","note":null},
+    {"brand":"르노코리아(삼성)","model":"QM6","targetPriceUsd":6692,"targetYear":2019,"fuel":"디젤","count":32,"title":"QM6 디젤 4WD RE 플러스","year":2017,"mileage":"11.7만km","priceKrw":9850000,"url":"https://www.heydealer.com/market/cars/NQpe2WlP","note":null},
+    {"brand":"아우디","model":"A4","targetPriceUsd":3885,"targetYear":2015,"fuel":"디젤","count":23,"title":"A4(B8) 2.0 TDI","year":2014,"mileage":"13.8만km","priceKrw":8400000,"url":"https://www.heydealer.com/market/cars/eyaNVYnM","note":null},
+    {"brand":"벤츠","model":"S클래스","targetPriceUsd":18736,"targetYear":2018,"fuel":"디젤","count":20,"title":"S클래스(W222) S350d 4MATIC AMG Line","year":2020,"mileage":"10.9만km","priceKrw":45900000,"url":"https://www.heydealer.com/market/cars/myAGerQp","note":"2017~18년식 재고 없음, 2019년 이후만 유통"},
+    {"brand":"포드","model":"익스플로러","targetPriceUsd":6788,"targetYear":2016,"fuel":"가솔린","count":20,"title":"익스플로러 2.0 에코부스트 2WD 5세대","year":2014,"mileage":"13.2만km","priceKrw":7800000,"url":"https://www.heydealer.com/market/cars/BQ45xZlR","note":null},
+    {"brand":"기아","model":"모닝","targetPriceUsd":3204,"targetYear":2017,"fuel":"가솔린","count":20,"title":"올뉴모닝(JA) 럭셔리","year":2017,"mileage":"16.1만km","priceKrw":5800000,"url":"https://www.heydealer.com/market/cars/myAxODlp","note":null},
+    {"brand":"현대","model":"쏘나타","targetPriceUsd":4500,"targetYear":2018,"fuel":"LPG","count":19,"title":"LF쏘나타 LPI 모던","year":2016,"mileage":"9.9만km","priceKrw":9900000,"url":"https://www.heydealer.com/market/cars/2yMMwoyW","note":"LPG 재고 3대뿐, 현재 예약 중 상태로 표시됨"},
+    {"brand":"벤츠","model":"GLC클래스","targetPriceUsd":15500,"targetYear":2019,"fuel":"디젤","count":17,"title":"GLC클래스(X253) GLC220d 4MATIC","year":2017,"mileage":"16.6만km","priceKrw":18900000,"url":"https://www.heydealer.com/market/cars/XlX4p1lY","note":null}
+  ]
+};
+
+function fmtKrw(n){ return "₩" + n.toLocaleString("ko-KR"); }
+function fmtUsd(n){ return "$" + Math.round(n).toLocaleString("en-US"); }
+
+function render(data){
+  const rate = data.exchangeRateKrwPerUsd;
+  const items = data.items;
+
+  document.getElementById("meta-chips").innerHTML = `
+    <div class="chip">📅 <b>${data.generatedAt}</b> 기준</div>
+    <div class="chip">💱 1 USD = <span class="num">${rate.toLocaleString()}</span>원</div>
+  `;
+
+  const avgGap = items.reduce((s,it)=> s + ((it.priceKrw/rate)/it.targetPriceUsd - 1), 0) / items.length;
+  const closeCount = items.filter(it => Math.abs((it.priceKrw/rate)/it.targetPriceUsd - 1) <= 0.15).length;
+
+  document.getElementById("stat-row").innerHTML = `
+    <div class="stat"><div class="label">추천 차량</div><div class="value num">${items.length}종</div><div class="sub">최근 2개월 매입 상위 모델</div></div>
+    <div class="stat"><div class="label">매입단가 근접 매물</div><div class="value num">${closeCount}종</div><div class="sub">±15% 이내 (${Math.round(closeCount/items.length*100)}%)</div></div>
+    <div class="stat"><div class="label">평균 가격 갭</div><div class="value num">${avgGap>=0?"+":""}${Math.round(avgGap*100)}%</div><div class="sub">헤이딜러 인증매물 특성상 상회 경향</div></div>
+    <div class="stat"><div class="label">환율 기준일</div><div class="value num">${data.generatedAt}</div><div class="sub">${data.exchangeRateSource.split("(")[0].trim()}</div></div>
+  `;
+
+  const grid = document.getElementById("grid");
+  grid.innerHTML = items.map((it, i) => {
+    const usd = it.priceKrw / rate;
+    const gapPct = Math.round((usd/it.targetPriceUsd - 1) * 100);
+    let gapClass = "good";
+    if (Math.abs(gapPct) > 60) gapClass = "bad";
+    else if (Math.abs(gapPct) > 15) gapClass = "warn";
+    const changedBadge = it.priceChanged ? `<div class="price-changed-badge">가격 변경됨</div>` : "";
+    return `
+    <div class="card">
+      ${changedBadge}
+      <span class="rank">#${String(i+1).padStart(2,"0")}</span>
+      <h2><span class="brand">${it.brand}</span>${it.model}</h2>
+      <div class="listing-title">${it.title}</div>
+      <div class="spec-row">
+        <span class="spec">${it.year}년식</span>
+        <span class="spec">${it.mileage}</span>
+        <span class="spec">${it.fuel}</span>
+        <span class="spec">매입 ${it.count}건 참고</span>
+      </div>
+      <div class="price-block">
+        <div>
+          <div class="price-krw num">${fmtKrw(it.priceKrw)}</div>
+          <div class="price-usd num">≈ ${fmtUsd(usd)} · 매입기준 ${fmtUsd(it.targetPriceUsd)}</div>
+        </div>
+        <div class="gap-badge ${gapClass}">${gapPct>=0?"+":""}${gapPct}%</div>
+      </div>
+      ${it.note ? `<div class="note">${it.note}</div>` : ""}
+      <a class="view-btn" href="${it.url}" target="_blank" rel="noopener">헤이딜러에서 매물 보기 ↗</a>
+    </div>`;
+  }).join("");
+
+  document.getElementById("footer").innerHTML = `
+    <div class="snapshot-note">이 페이지는 외부 공유용 스냅샷입니다. 사내 라이브 대시보드가 매일 오전 9시(KST) 자동 갱신되며, 그 내용을 반영해 이 페이지도 함께 갱신됩니다.</div>
+    <div>매입 기준가는 망고카 2026년 7~8월 플랫폼 거래 데이터의 모델별 <b>중앙값</b>(이상치 영향 최소화)을 사용했습니다.</div>
+    <div>전일 대비 가격이 변경된 매물은 카드 상단에 "가격 변경됨" 배지로 표시됩니다.</div>
+    <div>환율 출처: ${data.exchangeRateSource}</div>
+  `;
+}
+
+render(DATA);
+</script>
+</body>
+</html>
