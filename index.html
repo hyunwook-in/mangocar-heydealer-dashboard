@@ -29,7 +29,7 @@
     --shadow: 0 1px 2px rgba(33,29,23,0.04), 0 8px 24px -12px rgba(33,29,23,0.12);
   }
   @media (prefers-color-scheme: dark){
-    :root{
+    :root:not([data-theme="light"]){
       --bg:#14161b;
       --surface:#1b1e25;
       --surface-alt:#22252d;
@@ -48,6 +48,24 @@
       --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
     }
   }
+  :root[data-theme="dark"]{
+    --bg:#14161b;
+    --surface:#1b1e25;
+    --surface-alt:#22252d;
+    --border:#2d313b;
+    --text:#ece9e1;
+    --text-muted:#9a978d;
+    --accent:#7688b8;
+    --accent-soft:#242c40;
+    --accent-ink:#0f1117;
+    --good:#6bbf8e;
+    --good-soft:#1c2f24;
+    --warn:#dcac52;
+    --warn-soft:#332a16;
+    --bad:#e08277;
+    --bad-soft:#33201d;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+  }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:var(--bg);}
   body{color:var(--text);font-family:"IBM Plex Sans KR","Pretendard",-apple-system,sans-serif;line-height:1.5;}
@@ -62,10 +80,13 @@
   .chip b{color:var(--text);font-weight:600;}
   .chip .num{color:var(--accent);font-weight:600;}
 
-  .rule-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 18px;margin-bottom:24px;box-shadow:var(--shadow);font-size:12.5px;color:var(--text-muted);display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  .rule-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 18px;margin-bottom:14px;box-shadow:var(--shadow);font-size:12.5px;color:var(--text-muted);display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
   .rule-box .rule{padding-left:12px;border-left:2px solid var(--accent-soft);}
   .rule-box .rule b{display:block;color:var(--text);font-size:13px;margin-bottom:2px;}
+  .rule-box .rule.highlight{border-left-color:var(--good);}
   @media (max-width:760px){.rule-box{grid-template-columns:1fr;}}
+
+  .snapshot-note{font-size:11.5px;color:var(--text-muted);background:var(--accent-soft);border:1px solid var(--border);border-radius:10px;padding:8px 12px;margin-bottom:20px;}
 
   .tabs{display:flex;gap:8px;margin-bottom:16px;border-bottom:1px solid var(--border);overflow-x:auto;}
   .tab-btn{appearance:none;border:none;background:none;cursor:pointer;font-family:"IBM Plex Sans KR",sans-serif;font-size:14.5px;font-weight:600;color:var(--text-muted);padding:10px 6px 12px;border-bottom:2.5px solid transparent;display:flex;align-items:center;gap:8px;white-space:nowrap;flex-shrink:0;}
@@ -78,7 +99,13 @@
 
   .tab-panel{display:none;}
   .tab-panel.active{display:block;}
-  .tab-desc{font-size:12.5px;color:var(--text-muted);margin:0 0 14px;}
+  .panel-head{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;margin:0 0 14px;}
+  .tab-desc{font-size:12.5px;color:var(--text-muted);margin:0;}
+
+  .sort-group{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-muted);flex-shrink:0;}
+  .sort-group .sort-label{margin-right:2px;}
+  .sort-btn{appearance:none;cursor:pointer;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);font-family:inherit;font-size:11.5px;font-weight:600;padding:5px 10px;border-radius:999px;transition:background .15s ease,color .15s ease;}
+  .sort-btn[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);}
 
   .list{display:flex;flex-direction:column;gap:8px;}
   .row{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);display:grid;grid-template-columns:28px 1.4fr 1.6fr auto auto;gap:14px;align-items:center;}
@@ -98,6 +125,7 @@
   .gap-badge{font-size:10.5px;font-weight:600;padding:3px 8px;border-radius:8px;white-space:nowrap;justify-self:end;}
   .gap-badge.good{background:var(--good-soft);color:var(--good);}
   .gap-badge.warn{background:var(--warn-soft);color:var(--warn);}
+  .row.cheaper{border-color:var(--good);}
   a.view-btn{display:flex;align-items:center;justify-content:center;background:var(--accent);color:var(--accent-ink);text-decoration:none;font-size:12.5px;font-weight:600;padding:9px 14px;border-radius:9px;white-space:nowrap;transition:opacity .15s ease;}
   a.view-btn:hover{opacity:0.88;}
   a.view-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
@@ -109,7 +137,6 @@
   }
 
   footer{margin-top:40px;padding-top:20px;border-top:1px solid var(--border);font-size:12px;color:var(--text-muted);display:flex;flex-direction:column;gap:6px;}
-  .snapshot-note{font-size:11.5px;color:var(--text-muted);background:var(--accent-soft);border:1px solid var(--border);border-radius:10px;padding:8px 12px;margin-bottom:20px;}
 </style>
 </head>
 <body>
@@ -117,7 +144,7 @@
   <header class="top">
     <div class="title-block">
       <h1>헤이딜러 매입 후보</h1>
-      <p>망고카 최근 2개월(2026년 7~8월) 매입 데이터 상위 20개 모델 기준, 헤이딜러 재고 매물을 가격 근접도에 따라 <b>적극 추천</b> / <b>추천</b> 두 단계로 나눠 리스트 형태로 보여줍니다.</p>
+      <p>망고카 최근 2개월(2026년 7~8월) 매입 데이터 상위 20개 모델 기준, 헤이딜러 재고 매물을 가격 경쟁력에 따라 <b>적극 추천</b> / <b>추천</b> 두 단계로 나눠 리스트 형태로 보여줍니다.</p>
     </div>
     <div class="meta-chips">
       <span class="chip">갱신 <b id="updatedAt">-</b></span>
@@ -127,7 +154,8 @@
   </header>
 
   <div class="rule-box">
-    <div class="rule"><b>가격 밴드 (적극 추천)</b>목표가 5,000불 이하 → ±500불 / 5,000불 초과 → ±1,000불 이내</div>
+    <div class="rule highlight"><b>즉시 적극 추천</b>헤이딜러 광고가가 망고 매입가보다 낮은 매물 (가격차 마이너스)</div>
+    <div class="rule"><b>가격 밴드 (적극 추천)</b>목표가 5,000불 이하 → ±500불 / 초과 → ±1,000불 이내</div>
     <div class="rule"><b>추천 범위</b>밴드를 벗어나지만 목표가와 2,000불 미만 차이</div>
     <div class="rule"><b>제외 기준</b>목표가와 2,000불 이상 차이나는 매물은 표시하지 않음</div>
   </div>
@@ -144,39 +172,73 @@
   </div>
 
   <div class="tab-panel active" id="panel-strong">
-    <p class="tab-desc">목표가 밴드(±500~1,000불) 이내로, 가장 근접한 매물부터 최대 10대를 보여줍니다.</p>
+    <div class="panel-head">
+      <p class="tab-desc">헤이딜러가 망고 매입가보다 낮은 매물, 또는 밴드(±500~1,000불) 이내 매물 중 가장 경쟁력 있는 순으로 최대 10대입니다.</p>
+      <div class="sort-group" data-panel="strong">
+        <span class="sort-label">정렬</span>
+        <button class="sort-btn" data-sort="gap" aria-pressed="true">가격차 순</button>
+        <button class="sort-btn" data-sort="name" aria-pressed="false">차량 이름순</button>
+      </div>
+    </div>
     <div class="list" id="listStrong"></div>
   </div>
   <div class="tab-panel" id="panel-normal">
-    <p class="tab-desc">밴드를 벗어났지만 목표가와 2,000불 미만 차이로, 매입을 검토해볼 만한 매물 최대 30대입니다.</p>
+    <div class="panel-head">
+      <p class="tab-desc">밴드를 벗어났지만 목표가와 2,000불 미만 차이로, 매입을 검토해볼 만한 매물 최대 30대입니다.</p>
+      <div class="sort-group" data-panel="normal">
+        <span class="sort-label">정렬</span>
+        <button class="sort-btn" data-sort="gap" aria-pressed="true">가격차 순</button>
+        <button class="sort-btn" data-sort="name" aria-pressed="false">차량 이름순</button>
+      </div>
+    </div>
     <div class="list" id="listNormal"></div>
   </div>
 
   <footer>
     <div>가격은 헤이딜러 인증 소비자 판매가 기준(할인 적용가)이며, 망고카 실제 매입 단가와는 차이가 있을 수 있습니다.</div>
-    <div>매일 오전 9시(KST) 20개 모델 재조회 → 밴드/제외 기준 재적용 → 이 페이지 자동 갱신.</div>
+    <div>전체 20개 모델의 로드된 매물을 모두 스캔한 뒤, 가격 경쟁력(헤이딜러가 − 망고 매입가) 기준으로 정렬해 상위 항목만 보여줍니다.</div>
+    <div>매일 오전 9시(KST) 20개 모델 재조회 → 등급/정렬 재적용 → 이 페이지 자동 갱신.</div>
   </footer>
 </div>
 
 <script>
-const DATA = {"strong": [{"id": "VljEj3QG", "category": "현대 투싼", "trim": "올 뉴 투싼", "year": "2016", "yearline": "2016년 (15/11)ㆍ14.4만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 780.0, "targetUsd": 5715, "targetManwon": 768.0, "diffManwon": 12.0, "url": "https://www.heydealer.com/market/cars/VljEj3QG"}, {"id": "Glx7YpQr", "category": "현대 투싼", "trim": "뉴 투싼 ix", "year": "2014", "yearline": "2014년 (13/06)ㆍ11.9만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 790.0, "targetUsd": 5715, "targetManwon": 768.0, "diffManwon": 22.0, "url": "https://www.heydealer.com/market/cars/Glx7YpQr"}, {"id": "dnKo5ono", "category": "현대 싼타페", "trim": "싼타페 DM", "year": "2015", "yearline": "2015년 (14/03)ㆍ14.7만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 830.0, "targetUsd": 5957, "targetManwon": 800.5, "diffManwon": 29.5, "url": "https://www.heydealer.com/market/cars/dnKo5ono"}, {"id": "dnKjROyo", "category": "르노코리아(삼성) QM6", "trim": "QM6", "year": "2018", "yearline": "2018년 (18/04)ㆍ12.9만km", "accident": "완전무사고", "eye": true, "reserved": false, "priceManwon": 950.0, "targetUsd": 6692, "targetManwon": 899.3, "diffManwon": 50.7, "url": "https://www.heydealer.com/market/cars/dnKjROyo"}, {"id": "rnYpe5yP", "category": "르노코리아(삼성) QM3", "trim": "QM3", "year": "2015", "yearline": "2015년 (15/03)ㆍ14.7만km", "accident": "무사고", "eye": false, "reserved": false, "priceManwon": 450.0, "targetUsd": 3728, "targetManwon": 501.0, "diffManwon": 51.0, "url": "https://www.heydealer.com/market/cars/rnYpe5yP"}, {"id": "gQz0weyK", "category": "기아 스포티지", "trim": "더 뉴 스포티지 R", "year": "2014", "yearline": "2014년 (14/04)ㆍ12.6만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 690.0, "targetUsd": 4663, "targetManwon": 626.6, "diffManwon": 63.4, "url": "https://www.heydealer.com/market/cars/gQz0weyK"}, {"id": "7lbZ30lX", "category": "현대 싼타페", "trim": "싼타페 DM", "year": "2015", "yearline": "2015년 (14/05)ㆍ14.9만km", "accident": "무사고", "eye": false, "reserved": false, "priceManwon": 870.0, "targetUsd": 5957, "targetManwon": 800.5, "diffManwon": 69.5, "url": "https://www.heydealer.com/market/cars/7lbZ30lX"}, {"id": "9nNx8klD", "category": "BMW 3시리즈", "trim": "BMW 3시리즈 (F30)", "year": "2015", "yearline": "2015년 (15/05)ㆍ11.5만km", "accident": "완전무사고", "eye": true, "reserved": false, "priceManwon": 1200.0, "targetUsd": 8200, "targetManwon": 1101.9, "diffManwon": 98.1, "url": "https://www.heydealer.com/market/cars/9nNx8klD"}, {"id": "2yMJ48nW", "category": "벤츠 C클래스", "trim": "벤츠 C클래스 (W205)", "year": "2016", "yearline": "2016년 (15/08)ㆍ12.6만km", "accident": "무사고", "eye": false, "reserved": false, "priceManwon": 1260.0, "targetUsd": 8418, "targetManwon": 1131.2, "diffManwon": 128.8, "url": "https://www.heydealer.com/market/cars/2yMJ48nW"}, {"id": "BQ45xZlR", "category": "포드 익스플로러", "trim": "포드 익스플로러", "year": "2014", "yearline": "2014년 (14/04)ㆍ13.2만km", "accident": "완전무사고", "eye": true, "reserved": false, "priceManwon": 780.0, "targetUsd": 6788, "targetManwon": 912.2, "diffManwon": 132.2, "url": "https://www.heydealer.com/market/cars/BQ45xZlR"}], "normal": [{"id": "znExW1yq", "category": "르노코리아(삼성) QM3", "trim": "QM3", "year": "2016", "yearline": "2016년 (16/08)ㆍ5.5만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 630.0, "targetUsd": 3728, "targetManwon": 501.0, "diffManwon": 129.0, "url": "https://www.heydealer.com/market/cars/znExW1yq"}, {"id": "BQ4w8wnR", "category": "기아 쏘렌토", "trim": "올 뉴 쏘렌토", "year": "2015", "yearline": "2015년 (15/05)ㆍ14.2만km", "accident": "완전무사고", "eye": true, "reserved": false, "priceManwon": 1015.0, "targetUsd": 6505, "targetManwon": 874.2, "diffManwon": 140.8, "url": "https://www.heydealer.com/market/cars/BQ4w8wnR"}, {"id": "myAxODlp", "category": "기아 모닝", "trim": "올 뉴 모닝 (JA)", "year": "2017", "yearline": "2017년 (17/04)ㆍ16.1만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 580.0, "targetUsd": 3204, "targetManwon": 430.6, "diffManwon": 149.4, "url": "https://www.heydealer.com/market/cars/myAxODlp"}, {"id": "Yn300VQp", "category": "르노코리아(삼성) QM6", "trim": "QM6", "year": "2017", "yearline": "2017년 (17/05)ㆍ14.2만km", "accident": "완전무사고", "eye": false, "reserved": false, "priceManwon": 1050.0, "targetUsd": 6692, "targetManwon": 899.3, "diffManwon": 150.7, "url": "https://www.heydealer.com/market/cars/Yn300VQp"}, {"id": "7yBmeXlE", "category": "현대 투싼", "trim": "뉴 투싼 ix", "year": "2014", "yearline": "2014년 (13/05)ㆍ5.7만km", "accident": "완전무사고", "eye": true, "reserved": false, "priceManwon": 920.0, "targetUsd": 5715, "targetManwon": 768.0, "diffManwon": 152.0, "url": "https://www.heydealer.com/market/cars/7yBmeXlE"}, {"id": "KlG7POlO", "category": "벤츠 C클래스", "trim": "벤츠 C클래스 (W205)", "year": "2015", "yearline": "2015년 (14/07)ㆍ9.7만km", "accident": "완전무사고", "eye": true, "reserved": false, "priceManwon": 1290.0, "targetUsd": 8418, "targetManwon": 1131.2, "diffManwon": 158.8, "url": "https://www.heydealer.com/market/cars/KlG7POlO"}, {"id": "pnW6kjy1", "category": "르노코리아(삼성) QM3", "trim": "QM3", "year": "2017", "yearline": "2017년 (17/06)ㆍ10.2만km", "accident": "완전무사고", "eye": true, "reserved": false, "priceManwon": 660.0, "targetUsd": 3728, "targetManwon": 501.0, "diffManwon": 159.0, "url": "https://www.heydealer.com/market/cars/pnW6kjy1"}, {"id": "plRJ2jlb", "category": "르노코리아(삼성) QM3", "trim": "QM3", "year": "2014", "yearline": "2014년 (14/05)ㆍ9.1만km", "accident": "완전무사고", "eye": true, "reserved": false, "priceManwon": 670.0, "targetUsd": 3728, "targetManwon": 501.0, "diffManwon": 169.0, "url": "https://www.heydealer.com/market/cars/plRJ2jlb"}, {"id": "Wnq9OmnL", "category": "현대 싼타페", "trim": "싼타페 DM", "year": "2014", "yearline": "2014년 (13/08)ㆍ12만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 970.0, "targetUsd": 5957, "targetManwon": 800.5, "diffManwon": 169.5, "url": "https://www.heydealer.com/market/cars/Wnq9OmnL"}, {"id": "gQzppwyK", "category": "르노코리아(삼성) QM3", "trim": "QM3", "year": "2015", "yearline": "2015년 (14/11)ㆍ5.4만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 680.0, "targetUsd": 3728, "targetManwon": 501.0, "diffManwon": 179.0, "url": "https://www.heydealer.com/market/cars/gQzppwyK"}, {"id": "qyLkmmlR", "category": "르노코리아(삼성) QM3", "trim": "QM3", "year": "2017", "yearline": "2017년 (17/03)ㆍ12.1만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 680.0, "targetUsd": 3728, "targetManwon": 501.0, "diffManwon": 179.0, "url": "https://www.heydealer.com/market/cars/qyLkmmlR"}, {"id": "knvE3jyJ", "category": "현대 싼타페", "trim": "싼타페 DM", "year": "2014", "yearline": "2014년 (14/01)ㆍ11.5만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 980.0, "targetUsd": 5957, "targetManwon": 800.5, "diffManwon": 179.5, "url": "https://www.heydealer.com/market/cars/knvE3jyJ"}, {"id": "wn2GoDQm", "category": "BMW 3시리즈", "trim": "BMW 3시리즈 (F30)", "year": "2017", "yearline": "2017년 (17/05)ㆍ12.5만km", "accident": "완전무사고", "eye": true, "reserved": false, "priceManwon": 1285.0, "targetUsd": 8200, "targetManwon": 1101.9, "diffManwon": 183.1, "url": "https://www.heydealer.com/market/cars/wn2GoDQm"}, {"id": "BQ484LQR", "category": "벤츠 C클래스", "trim": "벤츠 C클래스 (W205)", "year": "2016", "yearline": "2016년 (16/08)ㆍ8.1만km", "accident": "완전무사고", "eye": false, "reserved": false, "priceManwon": 1320.0, "targetUsd": 8418, "targetManwon": 1131.2, "diffManwon": 188.8, "url": "https://www.heydealer.com/market/cars/BQ484LQR"}, {"id": "KlGv5OQO", "category": "현대 싼타페", "trim": "싼타페 DM", "year": "2015", "yearline": "2015년 (15/03)ㆍ9.3만km", "accident": "완전무사고", "eye": false, "reserved": false, "priceManwon": 990.0, "targetUsd": 5957, "targetManwon": 800.5, "diffManwon": 189.5, "url": "https://www.heydealer.com/market/cars/KlGv5OQO"}, {"id": "XlX4p1lY", "category": "벤츠 GLC클래스", "trim": "벤츠 GLC클래스 (X253)", "year": "2017", "yearline": "2017년 (17/06)ㆍ16.6만km", "accident": "완전무사고", "eye": true, "reserved": false, "priceManwon": 1890.0, "targetUsd": 15500, "targetManwon": 2082.9, "diffManwon": 192.9, "url": "https://www.heydealer.com/market/cars/XlX4p1lY"}, {"id": "andKo2yb", "category": "현대 싼타페", "trim": "싼타페 더 프라임", "year": "2016", "yearline": "2016년 (16/07)ㆍ13.1만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 995.0, "targetUsd": 5957, "targetManwon": 800.5, "diffManwon": 194.5, "url": "https://www.heydealer.com/market/cars/andKo2yb"}, {"id": "XlX6gmnY", "category": "BMW 5시리즈", "trim": "BMW 5시리즈 (F10)", "year": "2016", "yearline": "2016년 (16/02)ㆍ10.3만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 1535.0, "targetUsd": 9900, "targetManwon": 1330.4, "diffManwon": 204.6, "url": "https://www.heydealer.com/market/cars/XlX6gmnY"}, {"id": "KlG8m3yO", "category": "BMW 5시리즈", "trim": "BMW 5시리즈 (F10)", "year": "2016", "yearline": "2016년 (16/10)ㆍ12.1만km", "accident": "완전무사고", "eye": true, "reserved": false, "priceManwon": 1550.0, "targetUsd": 9900, "targetManwon": 1330.4, "diffManwon": 219.6, "url": "https://www.heydealer.com/market/cars/KlG8m3yO"}, {"id": "VljEpvQG", "category": "기아 스포티지", "trim": "더 뉴 스포티지 R", "year": "2014", "yearline": "2014년 (14/10)ㆍ12.9만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 850.0, "targetUsd": 4663, "targetManwon": 626.6, "diffManwon": 223.4, "url": "https://www.heydealer.com/market/cars/VljEpvQG"}, {"id": "EQrz0GQg", "category": "기아 모닝", "trim": "올 뉴 모닝 (JA)", "year": "2019", "yearline": "2019년 (19/03)ㆍ13.3만km", "accident": "완전무사고", "eye": true, "reserved": false, "priceManwon": 660.0, "targetUsd": 3204, "targetManwon": 430.6, "diffManwon": 229.4, "url": "https://www.heydealer.com/market/cars/EQrz0GQg"}, {"id": "zlDwzJQx", "category": "기아 모닝", "trim": "올 뉴 모닝 (JA)", "year": "2017", "yearline": "2017년 (17/07)ㆍ7만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 660.0, "targetUsd": 3204, "targetManwon": 430.6, "diffManwon": 229.4, "url": "https://www.heydealer.com/market/cars/zlDwzJQx"}, {"id": "qyLAAmnR", "category": "기아 모닝", "trim": "올 뉴 모닝 (JA)", "year": "2017", "yearline": "2017년 (17/05)ㆍ10만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 660.0, "targetUsd": 3204, "targetManwon": 430.6, "diffManwon": 229.4, "url": "https://www.heydealer.com/market/cars/qyLAAmnR"}, {"id": "JlVqbVQE", "category": "르노코리아(삼성) QM6", "trim": "QM6", "year": "2017", "yearline": "2017년 (16/12)ㆍ6.8만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 1130.0, "targetUsd": 6692, "targetManwon": 899.3, "diffManwon": 230.7, "url": "https://www.heydealer.com/market/cars/JlVqbVQE"}, {"id": "BQ4wYWnR", "category": "BMW 5시리즈", "trim": "BMW 5시리즈 (F10)", "year": "2014", "yearline": "2014년 (14/01)ㆍ13.2만km", "accident": "완전무사고", "eye": true, "reserved": false, "priceManwon": 1090.0, "targetUsd": 9900, "targetManwon": 1330.4, "diffManwon": 240.4, "url": "https://www.heydealer.com/market/cars/BQ4wYWnR"}, {"id": "qyLXBRyR", "category": "아우디 A6", "trim": "아우디 A6 (C7)", "year": "2013", "yearline": "2013년 (13/05)ㆍ13.4만km", "accident": "무사고", "eye": false, "reserved": true, "priceManwon": 850.0, "targetUsd": 8228, "targetManwon": 1105.7, "diffManwon": 255.7, "url": "https://www.heydealer.com/market/cars/qyLXBRyR"}, {"id": "JQ8B4Zy3", "category": "기아 쏘렌토", "trim": "올 뉴 쏘렌토", "year": "2017", "yearline": "2017년 (17/01)ㆍ12.6만km", "accident": "완전무사고", "eye": false, "reserved": false, "priceManwon": 1130.0, "targetUsd": 6505, "targetManwon": 874.2, "diffManwon": 255.8, "url": "https://www.heydealer.com/market/cars/JQ8B4Zy3"}, {"id": "pQP5Yol9", "category": "벤츠 C클래스", "trim": "벤츠 C클래스 (W205)", "year": "2016", "yearline": "2016년 (15/10)ㆍ11.8만km", "accident": "완전무사고", "eye": true, "reserved": false, "priceManwon": 1390.0, "targetUsd": 8418, "targetManwon": 1131.2, "diffManwon": 258.8, "url": "https://www.heydealer.com/market/cars/pQP5Yol9"}, {"id": "Wnqe0qnL", "category": "벤츠 GLC클래스", "trim": "벤츠 GLC클래스 (X253)", "year": "2016", "yearline": "2016년 (16/02)ㆍ12.9만km", "accident": "완전무사고", "eye": false, "reserved": false, "priceManwon": 1820.0, "targetUsd": 15500, "targetManwon": 2082.9, "diffManwon": 262.9, "url": "https://www.heydealer.com/market/cars/Wnqe0qnL"}, {"id": "knvpmblJ", "category": "벤츠 GLC클래스", "trim": "벤츠 GLC클래스 (X253)", "year": "2018", "yearline": "2018년 (18/07)ㆍ13만km", "accident": "완전무사고", "eye": true, "reserved": false, "priceManwon": 2350.0, "targetUsd": 15500, "targetManwon": 2082.9, "diffManwon": 267.1, "url": "https://www.heydealer.com/market/cars/knvpmblJ"}], "updatedAt": "2026-09-07 09:00 KST", "snapshotNote": "2026-09-07 기준 헤이딜러 스냅샷 · 적극 추천 10대 / 추천 30대 (전체 조건 충족 매물은 적극 19대·추천 35대였으며, 모델 다양성을 고려해 각 모델별 근접 매물 순으로 상위 항목만 표시)"};
+const DATA = {"strong": [{"id": "Wnqe0qnL", "category": "벤츠 GLC클래스", "trim": "벤츠 GLC클래스 (X253)", "year": "2016", "yearline": "2016년 (16/02)ㆍ12.9만km", "accident": "완전무사고", "eye": false, "reserved": false, "priceManwon": 1820.0, "targetUsd": 15500, "targetManwon": 2082.9, "diffManwon": -262.9, "url": "https://www.heydealer.com/market/cars/Wnqe0qnL"}, {"id": "qyLXBRyR", "category": "아우디 A6", "trim": "아우디 A6 (C7)", "year": "2013", "yearline": "2013년 (13/05)ㆍ13.4만km", "accident": "무사고", "eye": false, "reserved": true, "priceManwon": 850.0, "targetUsd": 8228, "targetManwon": 1105.7, "diffManwon": -255.7, "url": "https://www.heydealer.com/market/cars/qyLXBRyR"}, {"id": "BQ4wYWnR", "category": "BMW 5시리즈", "trim": "BMW 5시리즈 (F10)", "year": "2014", "yearline": "2014년 (14/01)ㆍ13.2만km", "accident": "완전무사고", "eye": true, "reserved": false, "priceManwon": 1090.0, "targetUsd": 9900, "targetManwon": 1330.4, "diffManwon": -240.4, "url": "https://www.heydealer.com/market/cars/BQ4wYWnR"}, {"id": "XlX4p1lY", "category": "벤츠 GLC클래스", "trim": "벤츠 GLC클래스 (X253)", "year": "2017", "yearline": "2017년 (17/06)ㆍ16.6만km", "accident": "완전무사고", "eye": true, "reserved": false, "priceManwon": 1890.0, "targetUsd": 15500, "targetManwon": 2082.9, "diffManwon": -192.9, "url": "https://www.heydealer.com/market/cars/XlX4p1lY"}, {"id": "BQ45xZlR", "category": "포드 익스플로러", "trim": "포드 익스플로러", "year": "2014", "yearline": "2014년 (14/04)ㆍ13.2만km", "accident": "완전무사고", "eye": true, "reserved": false, "priceManwon": 780.0, "targetUsd": 6788, "targetManwon": 912.2, "diffManwon": -132.2, "url": "https://www.heydealer.com/market/cars/BQ45xZlR"}, {"id": "9nNY2YyD", "category": "BMW 3시리즈", "trim": "BMW 3시리즈 (F30)", "year": "2015", "yearline": "2015년 (15/06)ㆍ9만km", "accident": "무사고", "eye": true, "reserved": true, "priceManwon": 990.0, "targetUsd": 8200, "targetManwon": 1101.9, "diffManwon": -111.9, "url": "https://www.heydealer.com/market/cars/9nNY2YyD"}, {"id": "rnYpe5yP", "category": "르노코리아(삼성) QM3", "trim": "QM3", "year": "2015", "yearline": "2015년 (15/03)ㆍ14.7만km", "accident": "무사고", "eye": false, "reserved": false, "priceManwon": 450.0, "targetUsd": 3728, "targetManwon": 501.0, "diffManwon": -51.0, "url": "https://www.heydealer.com/market/cars/rnYpe5yP"}, {"id": "VljEj3QG", "category": "현대 투싼", "trim": "올 뉴 투싼", "year": "2016", "yearline": "2016년 (15/11)ㆍ14.4만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 780.0, "targetUsd": 5715, "targetManwon": 768.0, "diffManwon": 12.0, "url": "https://www.heydealer.com/market/cars/VljEj3QG"}, {"id": "Glx7YpQr", "category": "현대 투싼", "trim": "뉴 투싼 ix", "year": "2014", "yearline": "2014년 (13/06)ㆍ11.9만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 790.0, "targetUsd": 5715, "targetManwon": 768.0, "diffManwon": 22.0, "url": "https://www.heydealer.com/market/cars/Glx7YpQr"}, {"id": "dnKo5ono", "category": "현대 싼타페", "trim": "싼타페 DM", "year": "2015", "yearline": "2015년 (14/03)ㆍ14.7만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 830.0, "targetUsd": 5957, "targetManwon": 800.5, "diffManwon": 29.5, "url": "https://www.heydealer.com/market/cars/dnKo5ono"}], "normal": [{"id": "znExW1yq", "category": "르노코리아(삼성) QM3", "trim": "QM3", "year": "2016", "yearline": "2016년 (16/08)ㆍ5.5만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 630.0, "targetUsd": 3728, "targetManwon": 501.0, "diffManwon": 129.0, "url": "https://www.heydealer.com/market/cars/znExW1yq"}, {"id": "BQ4w8wnR", "category": "기아 쏘렌토", "trim": "올 뉴 쏘렌토", "year": "2015", "yearline": "2015년 (15/05)ㆍ14.2만km", "accident": "완전무사고", "eye": true, "reserved": false, "priceManwon": 1015.0, "targetUsd": 6505, "targetManwon": 874.2, "diffManwon": 140.8, "url": "https://www.heydealer.com/market/cars/BQ4w8wnR"}, {"id": "myAxODlp", "category": "기아 모닝", "trim": "올 뉴 모닝 (JA)", "year": "2017", "yearline": "2017년 (17/04)ㆍ16.1만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 580.0, "targetUsd": 3204, "targetManwon": 430.6, "diffManwon": 149.4, "url": "https://www.heydealer.com/market/cars/myAxODlp"}, {"id": "Yn300VQp", "category": "르노코리아(삼성) QM6", "trim": "QM6", "year": "2017", "yearline": "2017년 (17/05)ㆍ14.2만km", "accident": "완전무사고", "eye": false, "reserved": false, "priceManwon": 1050.0, "targetUsd": 6692, "targetManwon": 899.3, "diffManwon": 150.7, "url": "https://www.heydealer.com/market/cars/Yn300VQp"}, {"id": "7yBmeXlE", "category": "현대 투싼", "trim": "뉴 투싼 ix", "year": "2014", "yearline": "2014년 (13/05)ㆍ5.7만km", "accident": "완전무사고", "eye": true, "reserved": false, "priceManwon": 920.0, "targetUsd": 5715, "targetManwon": 768.0, "diffManwon": 152.0, "url": "https://www.heydealer.com/market/cars/7yBmeXlE"}, {"id": "KlG7POlO", "category": "벤츠 C클래스", "trim": "벤츠 C클래스 (W205)", "year": "2015", "yearline": "2015년 (14/07)ㆍ9.7만km", "accident": "완전무사고", "eye": true, "reserved": false, "priceManwon": 1290.0, "targetUsd": 8418, "targetManwon": 1131.2, "diffManwon": 158.8, "url": "https://www.heydealer.com/market/cars/KlG7POlO"}, {"id": "pnW6kjy1", "category": "르노코리아(삼성) QM3", "trim": "QM3", "year": "2017", "yearline": "2017년 (17/06)ㆍ10.2만km", "accident": "완전무사고", "eye": true, "reserved": false, "priceManwon": 660.0, "targetUsd": 3728, "targetManwon": 501.0, "diffManwon": 159.0, "url": "https://www.heydealer.com/market/cars/pnW6kjy1"}, {"id": "plRJ2jlb", "category": "르노코리아(삼성) QM3", "trim": "QM3", "year": "2014", "yearline": "2014년 (14/05)ㆍ9.1만km", "accident": "완전무사고", "eye": true, "reserved": false, "priceManwon": 670.0, "targetUsd": 3728, "targetManwon": 501.0, "diffManwon": 169.0, "url": "https://www.heydealer.com/market/cars/plRJ2jlb"}, {"id": "Wnq9OmnL", "category": "현대 싼타페", "trim": "싼타페 DM", "year": "2014", "yearline": "2014년 (13/08)ㆍ12만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 970.0, "targetUsd": 5957, "targetManwon": 800.5, "diffManwon": 169.5, "url": "https://www.heydealer.com/market/cars/Wnq9OmnL"}, {"id": "gQzppwyK", "category": "르노코리아(삼성) QM3", "trim": "QM3", "year": "2015", "yearline": "2015년 (14/11)ㆍ5.4만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 680.0, "targetUsd": 3728, "targetManwon": 501.0, "diffManwon": 179.0, "url": "https://www.heydealer.com/market/cars/gQzppwyK"}, {"id": "qyLkmmlR", "category": "르노코리아(삼성) QM3", "trim": "QM3", "year": "2017", "yearline": "2017년 (17/03)ㆍ12.1만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 680.0, "targetUsd": 3728, "targetManwon": 501.0, "diffManwon": 179.0, "url": "https://www.heydealer.com/market/cars/qyLkmmlR"}, {"id": "knvE3jyJ", "category": "현대 싼타페", "trim": "싼타페 DM", "year": "2014", "yearline": "2014년 (14/01)ㆍ11.5만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 980.0, "targetUsd": 5957, "targetManwon": 800.5, "diffManwon": 179.5, "url": "https://www.heydealer.com/market/cars/knvE3jyJ"}, {"id": "wn2GoDQm", "category": "BMW 3시리즈", "trim": "BMW 3시리즈 (F30)", "year": "2017", "yearline": "2017년 (17/05)ㆍ12.5만km", "accident": "완전무사고", "eye": true, "reserved": false, "priceManwon": 1285.0, "targetUsd": 8200, "targetManwon": 1101.9, "diffManwon": 183.1, "url": "https://www.heydealer.com/market/cars/wn2GoDQm"}, {"id": "BQ484LQR", "category": "벤츠 C클래스", "trim": "벤츠 C클래스 (W205)", "year": "2016", "yearline": "2016년 (16/08)ㆍ8.1만km", "accident": "완전무사고", "eye": false, "reserved": false, "priceManwon": 1320.0, "targetUsd": 8418, "targetManwon": 1131.2, "diffManwon": 188.8, "url": "https://www.heydealer.com/market/cars/BQ484LQR"}, {"id": "KlGv5OQO", "category": "현대 싼타페", "trim": "싼타페 DM", "year": "2015", "yearline": "2015년 (15/03)ㆍ9.3만km", "accident": "완전무사고", "eye": false, "reserved": false, "priceManwon": 990.0, "targetUsd": 5957, "targetManwon": 800.5, "diffManwon": 189.5, "url": "https://www.heydealer.com/market/cars/KlGv5OQO"}, {"id": "andKo2yb", "category": "현대 싼타페", "trim": "싼타페 더 프라임", "year": "2016", "yearline": "2016년 (16/07)ㆍ13.1만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 995.0, "targetUsd": 5957, "targetManwon": 800.5, "diffManwon": 194.5, "url": "https://www.heydealer.com/market/cars/andKo2yb"}, {"id": "XlX6gmnY", "category": "BMW 5시리즈", "trim": "BMW 5시리즈 (F10)", "year": "2016", "yearline": "2016년 (16/02)ㆍ10.3만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 1535.0, "targetUsd": 9900, "targetManwon": 1330.4, "diffManwon": 204.6, "url": "https://www.heydealer.com/market/cars/XlX6gmnY"}, {"id": "XlX2m8nY", "category": "현대 싼타페", "trim": "싼타페 DM", "year": "2015", "yearline": "2015년 (15/01)ㆍ15만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 1020.0, "targetUsd": 5957, "targetManwon": 800.5, "diffManwon": 219.5, "url": "https://www.heydealer.com/market/cars/XlX2m8nY"}, {"id": "KlG8m3yO", "category": "BMW 5시리즈", "trim": "BMW 5시리즈 (F10)", "year": "2016", "yearline": "2016년 (16/10)ㆍ12.1만km", "accident": "완전무사고", "eye": true, "reserved": false, "priceManwon": 1550.0, "targetUsd": 9900, "targetManwon": 1330.4, "diffManwon": 219.6, "url": "https://www.heydealer.com/market/cars/KlG8m3yO"}, {"id": "VljEpvQG", "category": "기아 스포티지", "trim": "더 뉴 스포티지 R", "year": "2014", "yearline": "2014년 (14/10)ㆍ12.9만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 850.0, "targetUsd": 4663, "targetManwon": 626.6, "diffManwon": 223.4, "url": "https://www.heydealer.com/market/cars/VljEpvQG"}, {"id": "EQrz0GQg", "category": "기아 모닝", "trim": "올 뉴 모닝 (JA)", "year": "2019", "yearline": "2019년 (19/03)ㆍ13.3만km", "accident": "완전무사고", "eye": true, "reserved": false, "priceManwon": 660.0, "targetUsd": 3204, "targetManwon": 430.6, "diffManwon": 229.4, "url": "https://www.heydealer.com/market/cars/EQrz0GQg"}, {"id": "zlDwzJQx", "category": "기아 모닝", "trim": "올 뉴 모닝 (JA)", "year": "2017", "yearline": "2017년 (17/07)ㆍ7만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 660.0, "targetUsd": 3204, "targetManwon": 430.6, "diffManwon": 229.4, "url": "https://www.heydealer.com/market/cars/zlDwzJQx"}, {"id": "qyLAAmnR", "category": "기아 모닝", "trim": "올 뉴 모닝 (JA)", "year": "2017", "yearline": "2017년 (17/05)ㆍ10만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 660.0, "targetUsd": 3204, "targetManwon": 430.6, "diffManwon": 229.4, "url": "https://www.heydealer.com/market/cars/qyLAAmnR"}, {"id": "JlVqbVQE", "category": "르노코리아(삼성) QM6", "trim": "QM6", "year": "2017", "yearline": "2017년 (16/12)ㆍ6.8만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 1130.0, "targetUsd": 6692, "targetManwon": 899.3, "diffManwon": 230.7, "url": "https://www.heydealer.com/market/cars/JlVqbVQE"}, {"id": "Wnq2wGQL", "category": "기아 모닝", "trim": "올 뉴 모닝 (JA)", "year": "2017", "yearline": "2017년 (17/09)ㆍ11.8만km", "accident": "무사고", "eye": false, "reserved": false, "priceManwon": 670.0, "targetUsd": 3204, "targetManwon": 430.6, "diffManwon": 239.4, "url": "https://www.heydealer.com/market/cars/Wnq2wGQL"}, {"id": "JQ8B4Zy3", "category": "기아 쏘렌토", "trim": "올 뉴 쏘렌토", "year": "2017", "yearline": "2017년 (17/01)ㆍ12.6만km", "accident": "완전무사고", "eye": false, "reserved": false, "priceManwon": 1130.0, "targetUsd": 6505, "targetManwon": 874.2, "diffManwon": 255.8, "url": "https://www.heydealer.com/market/cars/JQ8B4Zy3"}, {"id": "pQP5Yol9", "category": "벤츠 C클래스", "trim": "벤츠 C클래스 (W205)", "year": "2016", "yearline": "2016년 (15/10)ㆍ11.8만km", "accident": "완전무사고", "eye": true, "reserved": false, "priceManwon": 1390.0, "targetUsd": 8418, "targetManwon": 1131.2, "diffManwon": 258.8, "url": "https://www.heydealer.com/market/cars/pQP5Yol9"}, {"id": "Wnq0p7yL", "category": "기아 모닝", "trim": "올 뉴 모닝 (JA)", "year": "2018", "yearline": "2018년 (18/12)ㆍ10.3만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 690.0, "targetUsd": 3204, "targetManwon": 430.6, "diffManwon": 259.4, "url": "https://www.heydealer.com/market/cars/Wnq0p7yL"}, {"id": "XlXJDanY", "category": "기아 모닝", "trim": "올 뉴 모닝 (JA)", "year": "2018", "yearline": "2018년 (18/10)ㆍ11.4만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 690.0, "targetUsd": 3204, "targetManwon": 430.6, "diffManwon": 259.4, "url": "https://www.heydealer.com/market/cars/XlXJDanY"}, {"id": "5lOOe2l4", "category": "기아 모닝", "trim": "올 뉴 모닝 (JA)", "year": "2017", "yearline": "2017년 (17/02)ㆍ11.4만km", "accident": "무사고", "eye": true, "reserved": false, "priceManwon": 690.0, "targetUsd": 3204, "targetManwon": 430.6, "diffManwon": 259.4, "url": "https://www.heydealer.com/market/cars/5lOOe2l4"}], "updatedAt": "2026-09-07 09:00 KST", "snapshotNote": "2026-09-07 기준 헤이딜러 스냅샷 · 헤이딜러가가 망고 매입가보다 낮은 매물은 자동으로 적극 추천 · 전체 조건 충족 매물은 적극 23대·추천 31대였으며, 그중 가격 경쟁력 상위 적극 10대·추천 30대만 표시"};
 
 const RATE = 1343.82;
 function fmtManwon(v){ return v.toLocaleString('ko-KR', {maximumFractionDigits:0}); }
 function toUsd(manwon){ return Math.round(manwon*10000/RATE); }
 
+const sortState = { strong: 'gap', normal: 'gap' };
+
+function sortItems(items, mode){
+  const copy = items.slice();
+  if(mode === 'name'){
+    copy.sort((a,b) => {
+      const c = a.category.localeCompare(b.category, 'ko');
+      if(c !== 0) return c;
+      return (a.trim||'').localeCompare(b.trim||'', 'ko');
+    });
+  } else {
+    copy.sort((a,b) => a.diffManwon - b.diffManwon);
+  }
+  return copy;
+}
+
 function rowHtml(item, idx, tier){
   const priceUsd = toUsd(item.priceManwon);
   const diffUsd = toUsd(item.diffManwon);
+  const isCheaper = item.diffManwon <= 0;
   const badgeClass = tier === 'strong' ? 'good' : 'warn';
-  const badgeLabel = (item.priceManwon >= item.targetManwon ? '+' : '-') + diffUsd.toLocaleString('en-US') + '\$ 차이';
+  const badgeLabel = isCheaper
+    ? `${Math.abs(diffUsd).toLocaleString('en-US')}\$ 더 저렴`
+    : `+${diffUsd.toLocaleString('en-US')}\$ 차이`;
   const specs = [];
   if(item.yearline) specs.push(`<span class="spec">${item.yearline}</span>`);
   if(item.accident) specs.push(`<span class="spec">${item.accident}</span>`);
   if(item.eye) specs.push(`<span class="spec eye">eye 인증</span>`);
   if(item.reserved) specs.push(`<span class="spec reserved">예약 중</span>`);
   return `
-  <div class="row">
+  <div class="row${isCheaper ? ' cheaper' : ''}">
     <div class="rank num">${idx+1}</div>
     <div class="cat">
       <div class="brand-model">${item.category}</div>
@@ -189,17 +251,24 @@ function rowHtml(item, idx, tier){
     <div class="price-block">
       <div class="price-krw num">${fmtManwon(item.priceManwon)}만원</div>
       <div class="price-usd num">약 $${priceUsd.toLocaleString('en-US')}</div>
-      <div class="gap-badge ${badgeClass}">${badgeLabel}</div>
+      <div class="gap-badge ${isCheaper ? 'good' : badgeClass}">${badgeLabel}</div>
     </div>
     <a class="view-btn" href="${item.url}" target="_blank" rel="noopener noreferrer">매물 보기 →</a>
   </div>`;
 }
 
+function renderPanel(tier){
+  const items = DATA[tier] || [];
+  const sorted = sortItems(items, sortState[tier]);
+  const listId = tier === 'strong' ? 'listStrong' : 'listNormal';
+  document.getElementById(listId).innerHTML = sorted.map((it,i)=>rowHtml(it,i,tier)).join('');
+}
+
 function render(){
   document.getElementById('countStrong').textContent = DATA.strong.length;
   document.getElementById('countNormal').textContent = DATA.normal.length;
-  document.getElementById('listStrong').innerHTML = DATA.strong.map((it,i)=>rowHtml(it,i,'strong')).join('');
-  document.getElementById('listNormal').innerHTML = DATA.normal.map((it,i)=>rowHtml(it,i,'normal')).join('');
+  renderPanel('strong');
+  renderPanel('normal');
   document.getElementById('updatedAt').textContent = DATA.updatedAt || '-';
   document.getElementById('snapshotNote').textContent = DATA.snapshotNote || '';
 }
@@ -210,6 +279,17 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
     document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
     btn.setAttribute('aria-selected','true');
     document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+  });
+});
+
+document.querySelectorAll('.sort-group').forEach(group=>{
+  const tier = group.dataset.panel;
+  group.querySelectorAll('.sort-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      sortState[tier] = btn.dataset.sort;
+      group.querySelectorAll('.sort-btn').forEach(b=>b.setAttribute('aria-pressed', b===btn ? 'true' : 'false'));
+      renderPanel(tier);
+    });
   });
 });
 
