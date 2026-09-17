@@ -141,6 +141,17 @@
   }
 
   footer{margin-top:40px;padding-top:20px;border-top:1px solid var(--border);font-size:12px;color:var(--text-muted);display:flex;flex-direction:column;gap:6px;}
+
+  /* ---- 담당자 배정 (Supabase 연동) ---- */
+  .demo-note{font-size:11.5px;color:var(--text-muted);background:var(--accent-soft);border:1px dashed var(--accent);border-radius:10px;padding:8px 12px;margin-bottom:14px;}
+  .assignee-row{display:flex;align-items:center;gap:6px;margin-top:6px;flex-wrap:wrap;}
+  .assignee-input{font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface-alt);color:var(--text);width:96px;font-family:inherit;}
+  .assignee-btn{appearance:none;cursor:pointer;border:1px solid var(--border);border-radius:6px;font-size:11px;font-weight:600;padding:4px 10px;font-family:inherit;background:var(--surface);color:var(--text-muted);}
+  .assignee-btn.assign{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);}
+  .assignee-btn.cancel{color:var(--bad);}
+  .assignee-btn:hover{opacity:0.85;}
+  .assignee-btn:disabled{opacity:0.5;cursor:default;}
+  .assignee-status{font-size:10.5px;color:var(--text-muted);white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -165,6 +176,8 @@
     <div class="rule"><b>신규 진입 표기</b>전일 대비 해당 등급에 새로 나타난 매물은 "신규" 배지로 표시</div>
     <div class="rule"><b>가격 변경 표기</b>전일과 가격이 달라진 매물은 가격 아래 변동폭(하락/상승)으로 표시</div>
   </div>
+
+  <div class="demo-note">🧪 <b>담당자 배정 체험 (Supabase 연동)</b> — 각 매물 카드의 입력창에 이름을 넣고 "할당"을 누르면 저장되고, "취소"를 누르면 해제됩니다. 새로고침하거나 다른 기기에서 봐도 유지된다면 Supabase(서버 DB)에 저장된 것입니다.</div>
 
   <div class="snapshot-note" id="snapshotNote"></div>
 
@@ -207,12 +220,84 @@
   </footer>
 </div>
 
+<!-- =========================================================
+     🧪 담당자 배정 체험: Supabase 연동
+     - 아래 SUPABASE_URL / SUPABASE_ANON_KEY 를 Supabase 콘솔에서
+       발급받은 값으로 교체하세요.
+     - supabase.com → 프로젝트 생성(Region: Northeast Asia (Seoul))
+       → SQL Editor에서 아래 쿼리 실행:
+           create table assignments (
+             car_id text primary key,
+             assignee text,
+             updated_at timestamptz default now()
+           );
+           alter table assignments enable row level security;
+           create policy "allow all (test)" on assignments
+             for all using (true) with check (true);
+       → Project Settings → API 에서 URL과 anon public 키 복사
+     - 이 스크립트 태그와 아래 모듈 블록만 지우면 원래 페이지로 완전히 되돌아갑니다.
+     ========================================================= -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const DATA = {"strong":[{"id":"BQ4wYWnR","category":"BMW 5시리즈","trim":"(F10) 520d 럭셔리","year":"2014","yearline":"2014년 (14/01)ㆍ13.2만km","accident":"완전무사고","eye":true,"reserved":false,"priceManwon":1090.0,"targetUsd":9900,"targetManwon":1360.7,"diffManwon":-270.7,"url":"https://www.heydealer.com/market/cars/BQ4wYWnR","isNew":false,"prevPriceManwon":1090},{"id":"XlX4p1lY","category":"벤츠 GLC클래스","trim":"(X253) GLC220 d 4MATIC","year":"2017","yearline":"2017년 (17/06)ㆍ16.6만km","accident":"완전무사고","eye":true,"reserved":false,"priceManwon":1890.0,"targetUsd":15500,"targetManwon":2130.3,"diffManwon":-240.3,"url":"https://www.heydealer.com/market/cars/XlX4p1lY","isNew":false,"prevPriceManwon":1890},{"id":"andLJLnb","category":"벤츠 GLC클래스","trim":"(X253) GLC220 d 4MATIC","year":"2017","yearline":"2017년 (17/06)ㆍ13.7만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":1950.0,"targetUsd":15500,"targetManwon":2130.3,"diffManwon":-180.3,"url":"https://www.heydealer.com/market/cars/andLJLnb","isNew":false,"prevPriceManwon":1950},{"id":"WnqOOqnL","category":"벤츠 GLC클래스","trim":"(X253) GLC220 d 4MATIC","year":"2016","yearline":"2016년 (16/02)ㆍ12.9만km","accident":"완전무사고","eye":false,"reserved":false,"priceManwon":1970.0,"targetUsd":15500,"targetManwon":2130.3,"diffManwon":-160.3,"url":"https://www.heydealer.com/market/cars/WnqOOqnL","isNew":true,"prevPriceManwon":null},{"id":"gQz70alK","category":"폭스바겐 티구안","trim":"폭스바겐 뉴 티구안 2.0 TDI 컴포트5N (11년~현재)","year":"2015","yearline":"2015년 (14/08)ㆍ11.4만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":790.0,"targetUsd":6474,"targetManwon":889.8,"diffManwon":-99.8,"url":"https://www.heydealer.com/market/cars/gQz70alK","isNew":false,"prevPriceManwon":790},{"id":"JlVqzJQE","category":"현대 투싼","trim":"뉴 투싼 ix 디젤(e-VGT) 2WD프리미엄","year":"2014","yearline":"2014년 (13/06)ㆍ11.9만km","accident":"무사고","eye":false,"reserved":false,"priceManwon":750.0,"targetUsd":5715,"targetManwon":785.5,"diffManwon":-35.5,"url":"https://www.heydealer.com/market/cars/JlVqzJQE","isNew":false,"prevPriceManwon":750},{"id":"jlZZVAlp","category":"르노코리아(삼성) QM3","trim":"QM3 LE","year":"2015","yearline":"2015년 (15/01)ㆍ13.7만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":490.0,"targetUsd":3728,"targetManwon":512.4,"diffManwon":-22.4,"url":"https://www.heydealer.com/market/cars/jlZZVAlp","isNew":true,"prevPriceManwon":null},{"id":"VljEj3QG","category":"현대 투싼","trim":"올 뉴 투싼 디젤 1.7 2WD스타일","year":"2016","yearline":"2016년 (15/11)ㆍ14.4만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":770.0,"targetUsd":5715,"targetManwon":785.5,"diffManwon":-15.5,"url":"https://www.heydealer.com/market/cars/VljEj3QG","isNew":false,"prevPriceManwon":770},{"id":"Glx7YpQr","category":"현대 투싼","trim":"뉴 투싼 ix 디젤(e-VGT) 2WD스마트 스페셜","year":"2014","yearline":"2014년 (13/06)ㆍ11.9만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":790.0,"targetUsd":5715,"targetManwon":785.5,"diffManwon":4.5,"url":"https://www.heydealer.com/market/cars/Glx7YpQr","isNew":false,"prevPriceManwon":790},{"id":"bQ9OEoy3","category":"현대 싼타페","trim":"싼타페 DM 디젤(e-VGT) 2.0 2WD 프리미엄7인승","year":"2013","yearline":"2013년 (13/05)ㆍ12만km","accident":"완전무사고","eye":true,"reserved":false,"priceManwon":830.0,"targetUsd":5957,"targetManwon":818.7,"diffManwon":11.3,"url":"https://www.heydealer.com/market/cars/bQ9OEoy3","isNew":true,"prevPriceManwon":null}],"normal":[{"id":"znExW1yq","category":"르노코리아(삼성) QM3","trim":"QM3 RE","year":"2016","yearline":"2016년 (16/08)ㆍ5.5만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":620.0,"targetUsd":3728,"targetManwon":512.4,"diffManwon":107.6,"url":"https://www.heydealer.com/market/cars/znExW1yq","isNew":false,"prevPriceManwon":620},{"id":"VljDbJnG","category":"르노코리아(삼성) QM3","trim":"QM3 RE 시그니처","year":"2016","yearline":"2016년 (16/12)ㆍ9.2만km","accident":"완전무사고","eye":true,"reserved":false,"priceManwon":650.0,"targetUsd":3728,"targetManwon":512.4,"diffManwon":137.6,"url":"https://www.heydealer.com/market/cars/VljDbJnG","isNew":false,"prevPriceManwon":650},{"id":"XlX6gmnY","category":"BMW 5시리즈","trim":"(F10) 520d xDrive M 에어로 다이나믹","year":"2016","yearline":"2016년 (16/02)ㆍ10.3만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":1505.0,"targetUsd":9900,"targetManwon":1360.7,"diffManwon":144.3,"url":"https://www.heydealer.com/market/cars/XlX6gmnY","isNew":false,"prevPriceManwon":1505},{"id":"pnW6kjy1","category":"르노코리아(삼성) QM3","trim":"QM3 LE","year":"2017","yearline":"2017년 (17/06)ㆍ10.2만km","accident":"완전무사고","eye":true,"reserved":false,"priceManwon":660.0,"targetUsd":3728,"targetManwon":512.4,"diffManwon":147.6,"url":"https://www.heydealer.com/market/cars/pnW6kjy1","isNew":false,"prevPriceManwon":660},{"id":"jlZXjJnp","category":"기아 스포티지","trim":"더 뉴 스포티지 R 디젤 2WD 프레스티지","year":"2015","yearline":"2015년 (14/09)ㆍ14.5만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":790.0,"targetUsd":4663,"targetManwon":640.9,"diffManwon":149.1,"url":"https://www.heydealer.com/market/cars/jlZXjJnp","isNew":false,"prevPriceManwon":790},{"id":"WnqOEmnL","category":"현대 싼타페","trim":"싼타페 DM 디젤(e-VGT) 2.0 2WD 프리미엄5인승","year":"2014","yearline":"2014년 (13/08)ㆍ12만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":970.0,"targetUsd":5957,"targetManwon":818.7,"diffManwon":151.3,"url":"https://www.heydealer.com/market/cars/WnqOEmnL","isNew":true,"prevPriceManwon":null},{"id":"knvE3jyJ","category":"현대 싼타페","trim":"싼타페 DM 디젤(e-VGT) 2.0 2WD 익스클루시브5인승","year":"2014","yearline":"2014년 (14/01)ㆍ11.5만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":970.0,"targetUsd":5957,"targetManwon":818.7,"diffManwon":151.3,"url":"https://www.heydealer.com/market/cars/knvE3jyJ","isNew":false,"prevPriceManwon":970},{"id":"plRJ2jlb","category":"르노코리아(삼성) QM3","trim":"QM3 RE","year":"2014","yearline":"2014년 (14/05)ㆍ9.1만km","accident":"완전무사고","eye":true,"reserved":false,"priceManwon":670.0,"targetUsd":3728,"targetManwon":512.4,"diffManwon":157.6,"url":"https://www.heydealer.com/market/cars/plRJ2jlb","isNew":false,"prevPriceManwon":670},{"id":"qyLkmmlR","category":"르노코리아(삼성) QM3","trim":"QM3 LE","year":"2017","yearline":"2017년 (17/03)ㆍ12.1만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":670.0,"targetUsd":3728,"targetManwon":512.4,"diffManwon":157.6,"url":"https://www.heydealer.com/market/cars/qyLkmmlR","isNew":false,"prevPriceManwon":670},{"id":"wn2GoDQm","category":"BMW 3시리즈","trim":"(F30) 320dF30 (12년~18년)","year":"2017","yearline":"2017년 (17/05)ㆍ12.5만km","accident":"완전무사고","eye":true,"reserved":true,"priceManwon":1285.0,"targetUsd":8200,"targetManwon":1127.0,"diffManwon":158.0,"url":"https://www.heydealer.com/market/cars/wn2GoDQm","isNew":false,"prevPriceManwon":1285},{"id":"BQ484LQR","category":"벤츠 C클래스","trim":"(W205) C200 d","year":"2016","yearline":"2016년 (16/08)ㆍ8.1만km","accident":"완전무사고","eye":false,"reserved":false,"priceManwon":1320.0,"targetUsd":8418,"targetManwon":1157.0,"diffManwon":163.0,"url":"https://www.heydealer.com/market/cars/BQ484LQR","isNew":false,"prevPriceManwon":1320},{"id":"gQzppwyK","category":"르노코리아(삼성) QM3","trim":"QM3 RE","year":"2015","yearline":"2015년 (14/11)ㆍ5.4만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":680.0,"targetUsd":3728,"targetManwon":512.4,"diffManwon":167.6,"url":"https://www.heydealer.com/market/cars/gQzppwyK","isNew":false,"prevPriceManwon":680},{"id":"BQ4614yR","category":"현대 싼타페","trim":"싼타페 DM 디젤(e-VGT) 2.0 2WD 모던5인승","year":"2015","yearline":"2015년 (15/06)ㆍ8.7만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":990.0,"targetUsd":5957,"targetManwon":818.7,"diffManwon":171.3,"url":"https://www.heydealer.com/market/cars/BQ4614yR","isNew":false,"prevPriceManwon":990},{"id":"KlGv5OQO","category":"현대 싼타페","trim":"싼타페 DM 디젤(e-VGT) 2.0 2WD 프리미엄7인승","year":"2015","yearline":"2015년 (15/03)ㆍ9.3만km","accident":"완전무사고","eye":false,"reserved":false,"priceManwon":990.0,"targetUsd":5957,"targetManwon":818.7,"diffManwon":171.3,"url":"https://www.heydealer.com/market/cars/KlGv5OQO","isNew":false,"prevPriceManwon":990},{"id":"andKo2yb","category":"현대 싼타페","trim":"싼타페 더 프라임 디젤 2.0 2WD프리미엄 5인승","year":"2016","yearline":"2016년 (16/07)ㆍ13.1만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":995.0,"targetUsd":5957,"targetManwon":818.7,"diffManwon":176.3,"url":"https://www.heydealer.com/market/cars/andKo2yb","isNew":false,"prevPriceManwon":995},{"id":"KlG3ABlO","category":"아우디 A6","trim":"(C7) 40 TDI 콰트로C7 (15년~18년)","year":"2016","yearline":"2016년 (15/09)ㆍ8만km","accident":"무사고","eye":false,"reserved":true,"priceManwon":1320.0,"targetUsd":8228,"targetManwon":1130.9,"diffManwon":189.1,"url":"https://www.heydealer.com/market/cars/KlG3ABlO","isNew":false,"prevPriceManwon":1320},{"id":"qyLAAmnR","category":"기아 모닝","trim":"올 뉴 모닝 (JA) 럭셔리","year":"2017","yearline":"2017년 (17/05)ㆍ10만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":640.0,"targetUsd":3204,"targetManwon":440.4,"diffManwon":199.6,"url":"https://www.heydealer.com/market/cars/qyLAAmnR","isNew":false,"prevPriceManwon":640},{"id":"KlGvP5QO","category":"현대 투싼","trim":"올 뉴 투싼 디젤 1.7 2WD모던","year":"2018","yearline":"2018년 (17/06)ㆍ13.1만km","accident":"완전무사고","eye":true,"reserved":false,"priceManwon":990.0,"targetUsd":5715,"targetManwon":785.5,"diffManwon":204.5,"url":"https://www.heydealer.com/market/cars/KlGvP5QO","isNew":false,"prevPriceManwon":990},{"id":"VljEpvQG","category":"기아 스포티지","trim":"더 뉴 스포티지 R 디젤 2WD 프레스티지","year":"2014","yearline":"2014년 (14/10)ㆍ12.9만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":850.0,"targetUsd":4663,"targetManwon":640.9,"diffManwon":209.1,"url":"https://www.heydealer.com/market/cars/VljEpvQG","isNew":false,"prevPriceManwon":850},{"id":"JlVqbVQE","category":"르노코리아(삼성) QM6","trim":"QM6 디젤 4WD RE 시그니처","year":"2017","yearline":"2017년 (16/12)ㆍ6.8만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":1130.0,"targetUsd":6692,"targetManwon":919.8,"diffManwon":210.2,"url":"https://www.heydealer.com/market/cars/JlVqbVQE","isNew":false,"prevPriceManwon":1130},{"id":"myAvJNnp","category":"BMW 3시리즈","trim":"(F30) 320dF30 (12년~18년)","year":"2016","yearline":"2016년 (16/10)ㆍ10.1만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":1345.0,"targetUsd":8200,"targetManwon":1127.0,"diffManwon":218.0,"url":"https://www.heydealer.com/market/cars/myAvJNnp","isNew":false,"prevPriceManwon":1345},{"id":"WnqO2wGQL","category":"기아 모닝","trim":"올 뉴 모닝 (JA) 프레스티지","year":"2017","yearline":"2017년 (17/09)ㆍ11.8만km","accident":"무사고","eye":false,"reserved":false,"priceManwon":660.0,"targetUsd":3204,"targetManwon":440.4,"diffManwon":219.6,"url":"https://www.heydealer.com/market/cars/WnqO2wGQL","isNew":true,"prevPriceManwon":null},{"id":"OyoRY5lD","category":"벤츠 GLC클래스","trim":"(X253) GLC220 d 4MATIC 프리미엄","year":"2017","yearline":"2017년 (17/07)ㆍ9.2만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":2350.0,"targetUsd":15500,"targetManwon":2130.3,"diffManwon":219.7,"url":"https://www.heydealer.com/market/cars/OyoRY5lD","isNew":true,"prevPriceManwon":null},{"id":"knvpmblJ","category":"벤츠 GLC클래스","trim":"(X253) GLC250 d 4MATIC","year":"2018","yearline":"2018년 (18/07)ㆍ13만km","accident":"완전무사고","eye":true,"reserved":false,"priceManwon":2350.0,"targetUsd":15500,"targetManwon":2130.3,"diffManwon":219.7,"url":"https://www.heydealer.com/market/cars/knvpmblJ","isNew":false,"prevPriceManwon":2350},{"id":"eyaW7wQM","category":"벤츠 C클래스","trim":"(W205) C220 d 아방가르드","year":"2016","yearline":"2016년 (16/08)ㆍ10.2만km","accident":"무사고","eye":false,"reserved":false,"priceManwon":1380.0,"targetUsd":8418,"targetManwon":1157.0,"diffManwon":223.0,"url":"https://www.heydealer.com/market/cars/eyaW7wQM","isNew":false,"prevPriceManwon":1380},{"id":"pQP5Yol9","category":"벤츠 C클래스","trim":"(W205) C220 d 아방가르드","year":"2016","yearline":"2016년 (15/10)ㆍ11.8만km","accident":"완전무사고","eye":true,"reserved":false,"priceManwon":1390.0,"targetUsd":8418,"targetManwon":1157.0,"diffManwon":233.0,"url":"https://www.heydealer.com/market/cars/pQP5Yol9","isNew":true,"prevPriceManwon":null},{"id":"knve2dyJ","category":"기아 쏘렌토","trim":"올 뉴 쏘렌토 디젤 2.0 2WD프레스티지 5인승","year":"2016","yearline":"2016년 (16/06)ㆍ12.1만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":1130.0,"targetUsd":6505,"targetManwon":894.1,"diffManwon":235.9,"url":"https://www.heydealer.com/market/cars/knve2dyJ","isNew":true,"prevPriceManwon":null},{"id":"WnqO0p7yL","category":"기아 모닝","trim":"올 뉴 모닝 (JA) 럭셔리","year":"2018","yearline":"2018년 (18/12)ㆍ10.3만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":680.0,"targetUsd":3204,"targetManwon":440.4,"diffManwon":239.6,"url":"https://www.heydealer.com/market/cars/WnqO0p7yL","isNew":true,"prevPriceManwon":null},{"id":"5lOOe2l4","category":"기아 모닝","trim":"올 뉴 모닝 (JA) 럭셔리","year":"2017","yearline":"2017년 (17/02)ㆍ11.4만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":680.0,"targetUsd":3204,"targetManwon":440.4,"diffManwon":239.6,"url":"https://www.heydealer.com/market/cars/5lOOe2l4","isNew":false,"prevPriceManwon":680},{"id":"Oyo79LyD","category":"기아 쏘렌토","trim":"올 뉴 쏘렌토 디젤 2.0 2WD노블레스 스페셜 5인승","year":"2015","yearline":"2015년 (14/11)ㆍ11.5만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":1150.0,"targetUsd":6505,"targetManwon":894.1,"diffManwon":255.9,"url":"https://www.heydealer.com/market/cars/Oyo79LyD","isNew":true,"prevPriceManwon":null}],"updatedAt":"2026-09-17 09:14 KST","snapshotNote":"2026-09-17 자동 스캔(스케줄) · 헤이딜러가가 망고 매입가보다 낮은 매물은 자동 적극 추천 · 상위 적극 10건/추천 30건만 표시 · 전일(09-16) 대비 적극추천 유지 7건 · 신규진입 3건 · 탈락 3건 · 전체(적극+추천) 신규진입 10건, 가격변경 0건"};
+const DATA ={"strong":[{"id":"BQ4wYWnR","category":"BMW 5시리즈","trim":"(F10) 520d 럭셔리","year":"2014","yearline":"2014년 (14/01)ㆍ13.2만km","accident":"완전무사고","eye":true,"reserved":false,"priceManwon":1090.0,"targetUsd":9900,"targetManwon":1360.7,"diffManwon":-270.7,"url":"https://www.heydealer.com/market/cars/BQ4wYWnR","isNew":false,"prevPriceManwon":1090},{"id":"XlX4p1lY","category":"벤츠 GLC클래스","trim":"(X253) GLC220 d 4MATIC","year":"2017","yearline":"2017년 (17/06)ㆍ16.6만km","accident":"완전무사고","eye":true,"reserved":false,"priceManwon":1890.0,"targetUsd":15500,"targetManwon":2130.3,"diffManwon":-240.3,"url":"https://www.heydealer.com/market/cars/XlX4p1lY","isNew":false,"prevPriceManwon":1890},{"id":"andLJLnb","category":"벤츠 GLC클래스","trim":"(X253) GLC220 d 4MATIC","year":"2017","yearline":"2017년 (17/06)ㆍ13.7만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":1950.0,"targetUsd":15500,"targetManwon":2130.3,"diffManwon":-180.3,"url":"https://www.heydealer.com/market/cars/andLJLnb","isNew":false,"prevPriceManwon":1950},{"id":"WnqOOqnL","category":"벤츠 GLC클래스","trim":"(X253) GLC220 d 4MATIC","year":"2016","yearline":"2016년 (16/02)ㆍ12.9만km","accident":"완전무사고","eye":false,"reserved":false,"priceManwon":1970.0,"targetUsd":15500,"targetManwon":2130.3,"diffManwon":-160.3,"url":"https://www.heydealer.com/market/cars/WnqOOqnL","isNew":true,"prevPriceManwon":null},{"id":"gQz70alK","category":"폭스바겐 티구안","trim":"폭스바겐 뉴 티구안 2.0 TDI 컴포트5N (11년~현재)","year":"2015","yearline":"2015년 (14/08)ㆍ11.4만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":790.0,"targetUsd":6474,"targetManwon":889.8,"diffManwon":-99.8,"url":"https://www.heydealer.com/market/cars/gQz70alK","isNew":false,"prevPriceManwon":790},{"id":"JlVqzJQE","category":"현대 투싼","trim":"뉴 투싼 ix 디젤(e-VGT) 2WD프리미엄","year":"2014","yearline":"2014년 (13/06)ㆍ11.9만km","accident":"무사고","eye":false,"reserved":false,"priceManwon":750.0,"targetUsd":5715,"targetManwon":785.5,"diffManwon":-35.5,"url":"https://www.heydealer.com/market/cars/JlVqzJQE","isNew":false,"prevPriceManwon":750},{"id":"jlZZVAlp","category":"르노코리아(삼성) QM3","trim":"QM3 LE","year":"2015","yearline":"2015년 (15/01)ㆍ13.7만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":490.0,"targetUsd":3728,"targetManwon":512.4,"diffManwon":-22.4,"url":"https://www.heydealer.com/market/cars/jlZZVAlp","isNew":true,"prevPriceManwon":null},{"id":"VljEj3QG","category":"현대 투싼","trim":"올 뉴 투싼 디젤 1.7 2WD스타일","year":"2016","yearline":"2016년 (15/11)ㆍ14.4만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":770.0,"targetUsd":5715,"targetManwon":785.5,"diffManwon":-15.5,"url":"https://www.heydealer.com/market/cars/VljEj3QG","isNew":false,"prevPriceManwon":770},{"id":"Glx7YpQr","category":"현대 투싼","trim":"뉴 투싼 ix 디젤(e-VGT) 2WD스마트 스페셜","year":"2014","yearline":"2014년 (13/06)ㆍ11.9만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":790.0,"targetUsd":5715,"targetManwon":785.5,"diffManwon":4.5,"url":"https://www.heydealer.com/market/cars/Glx7YpQr","isNew":false,"prevPriceManwon":790},{"id":"bQ9OEoy3","category":"현대 싼타페","trim":"싼타페 DM 디젤(e-VGT) 2.0 2WD 프리미엄7인승","year":"2013","yearline":"2013년 (13/05)ㆍ12만km","accident":"완전무사고","eye":true,"reserved":false,"priceManwon":830.0,"targetUsd":5957,"targetManwon":818.7,"diffManwon":11.3,"url":"https://www.heydealer.com/market/cars/bQ9OEoy3","isNew":true,"prevPriceManwon":null}],"normal":[{"id":"znExW1yq","category":"르노코리아(삼성) QM3","trim":"QM3 RE","year":"2016","yearline":"2016년 (16/08)ㆍ5.5만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":620.0,"targetUsd":3728,"targetManwon":512.4,"diffManwon":107.6,"url":"https://www.heydealer.com/market/cars/znExW1yq","isNew":false,"prevPriceManwon":620},{"id":"VljDbJnG","category":"르노코리아(삼성) QM3","trim":"QM3 RE 시그니처","year":"2016","yearline":"2016년 (16/12)ㆍ9.2만km","accident":"완전무사고","eye":true,"reserved":false,"priceManwon":650.0,"targetUsd":3728,"targetManwon":512.4,"diffManwon":137.6,"url":"https://www.heydealer.com/market/cars/VljDbJnG","isNew":false,"prevPriceManwon":650},{"id":"XlX6gmnY","category":"BMW 5시리즈","trim":"(F10) 520d xDrive M 에어로 다이나믹","year":"2016","yearline":"2016년 (16/02)ㆍ10.3만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":1505.0,"targetUsd":9900,"targetManwon":1360.7,"diffManwon":144.3,"url":"https://www.heydealer.com/market/cars/XlX6gmnY","isNew":false,"prevPriceManwon":1505},{"id":"pnW6kjy1","category":"르노코리아(삼성) QM3","trim":"QM3 LE","year":"2017","yearline":"2017년 (17/06)ㆍ10.2만km","accident":"완전무사고","eye":true,"reserved":false,"priceManwon":660.0,"targetUsd":3728,"targetManwon":512.4,"diffManwon":147.6,"url":"https://www.heydealer.com/market/cars/pnW6kjy1","isNew":false,"prevPriceManwon":660},{"id":"jlZXjJnp","category":"기아 스포티지","trim":"더 뉴 스포티지 R 디젤 2WD 프레스티지","year":"2015","yearline":"2015년 (14/09)ㆍ14.5만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":790.0,"targetUsd":4663,"targetManwon":640.9,"diffManwon":149.1,"url":"https://www.heydealer.com/market/cars/jlZXjJnp","isNew":false,"prevPriceManwon":790},{"id":"WnqOEmnL","category":"현대 싼타페","trim":"싼타페 DM 디젤(e-VGT) 2.0 2WD 프리미엄5인승","year":"2014","yearline":"2014년 (13/08)ㆍ12만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":970.0,"targetUsd":5957,"targetManwon":818.7,"diffManwon":151.3,"url":"https://www.heydealer.com/market/cars/WnqOEmnL","isNew":true,"prevPriceManwon":null},{"id":"knvE3jyJ","category":"현대 싼타페","trim":"싼타페 DM 디젤(e-VGT) 2.0 2WD 익스클루시브5인승","year":"2014","yearline":"2014년 (14/01)ㆍ11.5만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":970.0,"targetUsd":5957,"targetManwon":818.7,"diffManwon":151.3,"url":"https://www.heydealer.com/market/cars/knvE3jyJ","isNew":false,"prevPriceManwon":970},{"id":"plRJ2jlb","category":"르노코리아(삼성) QM3","trim":"QM3 RE","year":"2014","yearline":"2014년 (14/05)ㆍ9.1만km","accident":"완전무사고","eye":true,"reserved":false,"priceManwon":670.0,"targetUsd":3728,"targetManwon":512.4,"diffManwon":157.6,"url":"https://www.heydealer.com/market/cars/plRJ2jlb","isNew":false,"prevPriceManwon":670},{"id":"qyLkmmlR","category":"르노코리아(삼성) QM3","trim":"QM3 LE","year":"2017","yearline":"2017년 (17/03)ㆍ12.1만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":670.0,"targetUsd":3728,"targetManwon":512.4,"diffManwon":157.6,"url":"https://www.heydealer.com/market/cars/qyLkmmlR","isNew":false,"prevPriceManwon":670},{"id":"wn2GoDQm","category":"BMW 3시리즈","trim":"(F30) 320dF30 (12년~18년)","year":"2017","yearline":"2017년 (17/05)ㆍ12.5만km","accident":"완전무사고","eye":true,"reserved":true,"priceManwon":1285.0,"targetUsd":8200,"targetManwon":1127.0,"diffManwon":158.0,"url":"https://www.heydealer.com/market/cars/wn2GoDQm","isNew":false,"prevPriceManwon":1285},{"id":"BQ484LQR","category":"벤츠 C클래스","trim":"(W205) C200 d","year":"2016","yearline":"2016년 (16/08)ㆍ8.1만km","accident":"완전무사고","eye":false,"reserved":false,"priceManwon":1320.0,"targetUsd":8418,"targetManwon":1157.0,"diffManwon":163.0,"url":"https://www.heydealer.com/market/cars/BQ484LQR","isNew":false,"prevPriceManwon":1320},{"id":"gQzppwyK","category":"르노코리아(삼성) QM3","trim":"QM3 RE","year":"2015","yearline":"2015년 (14/11)ㆍ5.4만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":680.0,"targetUsd":3728,"targetManwon":512.4,"diffManwon":167.6,"url":"https://www.heydealer.com/market/cars/gQzppwyK","isNew":false,"prevPriceManwon":680},{"id":"BQ4614yR","category":"현대 싼타페","trim":"싼타페 DM 디젤(e-VGT) 2.0 2WD 모던5인승","year":"2015","yearline":"2015년 (15/06)ㆍ8.7만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":990.0,"targetUsd":5957,"targetManwon":818.7,"diffManwon":171.3,"url":"https://www.heydealer.com/market/cars/BQ4614yR","isNew":false,"prevPriceManwon":990},{"id":"KlGv5OQO","category":"현대 싼타페","trim":"싼타페 DM 디젤(e-VGT) 2.0 2WD 프리미엄7인승","year":"2015","yearline":"2015년 (15/03)ㆍ9.3만km","accident":"완전무사고","eye":false,"reserved":false,"priceManwon":990.0,"targetUsd":5957,"targetManwon":818.7,"diffManwon":171.3,"url":"https://www.heydealer.com/market/cars/KlGv5OQO","isNew":false,"prevPriceManwon":990},{"id":"andKo2yb","category":"현대 싼타페","trim":"싼타페 더 프라임 디젤 2.0 2WD프리미엄 5인승","year":"2016","yearline":"2016년 (16/07)ㆍ13.1만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":995.0,"targetUsd":5957,"targetManwon":818.7,"diffManwon":176.3,"url":"https://www.heydealer.com/market/cars/andKo2yb","isNew":false,"prevPriceManwon":995},{"id":"KlG3ABlO","category":"아우디 A6","trim":"(C7) 40 TDI 콰트로C7 (15년~18년)","year":"2016","yearline":"2016년 (15/09)ㆍ8만km","accident":"무사고","eye":false,"reserved":true,"priceManwon":1320.0,"targetUsd":8228,"targetManwon":1130.9,"diffManwon":189.1,"url":"https://www.heydealer.com/market/cars/KlG3ABlO","isNew":false,"prevPriceManwon":1320},{"id":"qyLAAmnR","category":"기아 모닝","trim":"올 뉴 모닝 (JA) 럭셔리","year":"2017","yearline":"2017년 (17/05)ㆍ10만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":640.0,"targetUsd":3204,"targetManwon":440.4,"diffManwon":199.6,"url":"https://www.heydealer.com/market/cars/qyLAAmnR","isNew":false,"prevPriceManwon":640},{"id":"KlGvP5QO","category":"현대 투싼","trim":"올 뉴 투싼 디젤 1.7 2WD모던","year":"2018","yearline":"2018년 (17/06)ㆍ13.1만km","accident":"완전무사고","eye":true,"reserved":false,"priceManwon":990.0,"targetUsd":5715,"targetManwon":785.5,"diffManwon":204.5,"url":"https://www.heydealer.com/market/cars/KlGvP5QO","isNew":false,"prevPriceManwon":990},{"id":"VljEpvQG","category":"기아 스포티지","trim":"더 뉴 스포티지 R 디젤 2WD 프레스티지","year":"2014","yearline":"2014년 (14/10)ㆍ12.9만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":850.0,"targetUsd":4663,"targetManwon":640.9,"diffManwon":209.1,"url":"https://www.heydealer.com/market/cars/VljEpvQG","isNew":false,"prevPriceManwon":850},{"id":"JlVqbVQE","category":"르노코리아(삼성) QM6","trim":"QM6 디젤 4WD RE 시그니처","year":"2017","yearline":"2017년 (16/12)ㆍ6.8만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":1130.0,"targetUsd":6692,"targetManwon":919.8,"diffManwon":210.2,"url":"https://www.heydealer.com/market/cars/JlVqbVQE","isNew":false,"prevPriceManwon":1130},{"id":"myAvJNnp","category":"BMW 3시리즈","trim":"(F30) 320dF30 (12년~18년)","year":"2016","yearline":"2016년 (16/10)ㆍ10.1만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":1345.0,"targetUsd":8200,"targetManwon":1127.0,"diffManwon":218.0,"url":"https://www.heydealer.com/market/cars/myAvJNnp","isNew":false,"prevPriceManwon":1345},{"id":"WnqO2wGQL","category":"기아 모닝","trim":"올 뉴 모닝 (JA) 프레스티지","year":"2017","yearline":"2017년 (17/09)ㆍ11.8만km","accident":"무사고","eye":false,"reserved":false,"priceManwon":660.0,"targetUsd":3204,"targetManwon":440.4,"diffManwon":219.6,"url":"https://www.heydealer.com/market/cars/WnqO2wGQL","isNew":true,"prevPriceManwon":null},{"id":"OyoRY5lD","category":"벤츠 GLC클래스","trim":"(X253) GLC220 d 4MATIC 프리미엄","year":"2017","yearline":"2017년 (17/07)ㆍ9.2만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":2350.0,"targetUsd":15500,"targetManwon":2130.3,"diffManwon":219.7,"url":"https://www.heydealer.com/market/cars/OyoRY5lD","isNew":true,"prevPriceManwon":null},{"id":"knvpmblJ","category":"벤츠 GLC클래스","trim":"(X253) GLC250 d 4MATIC","year":"2018","yearline":"2018년 (18/07)ㆍ13만km","accident":"완전무사고","eye":true,"reserved":false,"priceManwon":2350.0,"targetUsd":15500,"targetManwon":2130.3,"diffManwon":219.7,"url":"https://www.heydealer.com/market/cars/knvpmblJ","isNew":false,"prevPriceManwon":2350},{"id":"eyaW7wQM","category":"벤츠 C클래스","trim":"(W205) C220 d 아방가르드","year":"2016","yearline":"2016년 (16/08)ㆍ10.2만km","accident":"무사고","eye":false,"reserved":false,"priceManwon":1380.0,"targetUsd":8418,"targetManwon":1157.0,"diffManwon":223.0,"url":"https://www.heydealer.com/market/cars/eyaW7wQM","isNew":false,"prevPriceManwon":1380},{"id":"pQP5Yol9","category":"벤츠 C클래스","trim":"(W205) C220 d 아방가르드","year":"2016","yearline":"2016년 (15/10)ㆍ11.8만km","accident":"완전무사고","eye":true,"reserved":false,"priceManwon":1390.0,"targetUsd":8418,"targetManwon":1157.0,"diffManwon":233.0,"url":"https://www.heydealer.com/market/cars/pQP5Yol9","isNew":true,"prevPriceManwon":null},{"id":"knve2dyJ","category":"기아 쏘렌토","trim":"올 뉴 쏘렌토 디젤 2.0 2WD프레스티지 5인승","year":"2016","yearline":"2016년 (16/06)ㆍ12.1만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":1130.0,"targetUsd":6505,"targetManwon":894.1,"diffManwon":235.9,"url":"https://www.heydealer.com/market/cars/knve2dyJ","isNew":true,"prevPriceManwon":null},{"id":"WnqO0p7yL","category":"기아 모닝","trim":"올 뉴 모닝 (JA) 럭셔리","year":"2018","yearline":"2018년 (18/12)ㆍ10.3만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":680.0,"targetUsd":3204,"targetManwon":440.4,"diffManwon":239.6,"url":"https://www.heydealer.com/market/cars/WnqO0p7yL","isNew":true,"prevPriceManwon":null},{"id":"5lOOe2l4","category":"기아 모닝","trim":"올 뉴 모닝 (JA) 럭셔리","year":"2017","yearline":"2017년 (17/02)ㆍ11.4만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":680.0,"targetUsd":3204,"targetManwon":440.4,"diffManwon":239.6,"url":"https://www.heydealer.com/market/cars/5lOOe2l4","isNew":false,"prevPriceManwon":680},{"id":"Oyo79LyD","category":"기아 쏘렌토","trim":"올 뉴 쏘렌토 디젤 2.0 2WD노블레스 스페셜 5인승","year":"2015","yearline":"2015년 (14/11)ㆍ11.5만km","accident":"무사고","eye":true,"reserved":false,"priceManwon":1150.0,"targetUsd":6505,"targetManwon":894.1,"diffManwon":255.9,"url":"https://www.heydealer.com/market/cars/Oyo79LyD","isNew":true,"prevPriceManwon":null}],"updatedAt":"2026-09-17 09:14 KST","snapshotNote":"2026-09-17 자동 스캔(스케줄) · 헤이딜러가가 망고 매입가보다 낮은 매물은 자동 적극 추천 · 상위 적극 10건/추천 30건만 표시 · 전일(09-16) 대비 적극추천 유지 7건 · 신규진입 3건 · 탈락 3건 · 전체(적극+추천) 신규진입 10건, 가격변경 0건"};
 
 const RATE = 1374.4165;
 function fmtManwon(v){ return v.toLocaleString('ko-KR', {maximumFractionDigits:0}); }
 function toUsd(manwon){ return Math.round(manwon*10000/RATE); }
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ---- 담당자 배정 (Supabase) ----
+// ↓↓↓ 여기를 본인의 Supabase 설정값으로 교체하세요 ↓↓↓
+const SUPABASE_URL = 'https://biovqzdyqyveqwktwyzk.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJpb3ZxemR5cXl2ZXF3a3R3eXprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2MTI2NzUsImV4cCI6MjEwNTE4ODY3NX0.wcMeW94_R-8SA0ED2PNK8wCboxTAdgI3dibs8EBFQog';
+// ↑↑↑ 여기까지 ↑↑↑
+
+let supabaseClient = null;
+const supabaseReady = !SUPABASE_URL.startsWith('여기에') && typeof window.supabase !== 'undefined';
+if (supabaseReady) {
+  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
+
+let assigneeMap = {}; // car_id -> 담당자 이름
+
+async function loadAssignees(){
+  if(!supabaseClient) return;
+  const { data, error } = await supabaseClient.from('assignments').select('car_id, assignee');
+  if(error){ console.error(error); return; }
+  assigneeMap = {};
+  (data || []).forEach(row => { if(row.assignee) assigneeMap[row.car_id] = row.assignee; });
+}
+
+async function assignCar(carId, name, statusEl, btnAssign, btnCancel){
+  if(!supabaseClient){ if(statusEl) statusEl.textContent = '⚠️ Supabase 설정 필요'; return; }
+  if(!name){ if(statusEl) statusEl.textContent = '이름을 입력하세요'; return; }
+  if(btnAssign) btnAssign.disabled = true;
+  if(btnCancel) btnCancel.disabled = true;
+  if(statusEl) statusEl.textContent = '할당 중...';
+  const { error } = await supabaseClient.from('assignments')
+    .upsert({ car_id: carId, assignee: name, updated_at: new Date().toISOString() });
+  if(btnAssign) btnAssign.disabled = false;
+  if(btnCancel) btnCancel.disabled = false;
+  if(error){ console.error(error); if(statusEl) statusEl.textContent = '실패 — 콘솔 확인'; return; }
+  assigneeMap[carId] = name;
+  if(statusEl) statusEl.textContent = `담당: ${name}`;
+}
+
+async function cancelAssign(carId, inputEl, statusEl, btnAssign, btnCancel){
+  if(!supabaseClient){ if(statusEl) statusEl.textContent = '⚠️ Supabase 설정 필요'; return; }
+  if(btnAssign) btnAssign.disabled = true;
+  if(btnCancel) btnCancel.disabled = true;
+  if(statusEl) statusEl.textContent = '취소 중...';
+  const { error } = await supabaseClient.from('assignments').delete().eq('car_id', carId);
+  if(btnAssign) btnAssign.disabled = false;
+  if(btnCancel) btnCancel.disabled = false;
+  if(error){ console.error(error); if(statusEl) statusEl.textContent = '실패 — 콘솔 확인'; return; }
+  delete assigneeMap[carId];
+  if(inputEl) inputEl.value = '';
+  if(statusEl) statusEl.textContent = '미배정';
+}
 
 const sortState = { strong: 'gap', normal: 'gap' };
 
@@ -251,6 +336,8 @@ function rowHtml(item, idx, tier){
     const arrow = delta < 0 ? '▼' : '▲';
     priceChangeHtml = `<div class="price-change ${dir}">전일 대비 ${arrow}${Math.abs(delta).toLocaleString('ko-KR')}만원</div>`;
   }
+  const currentAssignee = assigneeMap[item.id] || '';
+  const statusText = currentAssignee ? `담당: ${escapeHtml(currentAssignee)}` : '미배정';
   return `
   <div class="row${isCheaper ? ' cheaper' : ''}">
     <div class="rank num">${idx+1}</div>
@@ -261,6 +348,12 @@ function rowHtml(item, idx, tier){
     <div class="detail">
       <div class="trim">${item.trim || ''}</div>
       <div class="spec-row">${specs.join('')}</div>
+      <div class="assignee-row">
+        <input type="text" class="assignee-input" data-car-id="${item.id}" placeholder="담당자 이름" value="${escapeHtml(currentAssignee)}">
+        <button type="button" class="assignee-btn assign" data-car-id="${item.id}">할당</button>
+        <button type="button" class="assignee-btn cancel" data-car-id="${item.id}">취소</button>
+        <span class="assignee-status">${statusText}</span>
+      </div>
     </div>
     <div class="price-block">
       <div class="price-krw num">${fmtManwon(item.priceManwon)}만원</div>
@@ -279,14 +372,47 @@ function renderPanel(tier){
   document.getElementById(listId).innerHTML = sorted.map((it,i)=>rowHtml(it,i,tier)).join('');
 }
 
-function render(){
+async function init(){
   document.getElementById('countStrong').textContent = DATA.strong.length;
   document.getElementById('countNormal').textContent = DATA.normal.length;
-  renderPanel('strong');
-  renderPanel('normal');
   document.getElementById('updatedAt').textContent = DATA.updatedAt || '-';
   document.getElementById('snapshotNote').textContent = DATA.snapshotNote || '';
+  await loadAssignees();
+  renderPanel('strong');
+  renderPanel('normal');
 }
+
+function handleAssigneeListClick(e){
+  const btn = e.target.closest('.assignee-btn');
+  if(!btn) return;
+  const row = btn.closest('.assignee-row');
+  const carId = btn.dataset.carId;
+  const inputEl = row.querySelector('.assignee-input');
+  const statusEl = row.querySelector('.assignee-status');
+  const btnAssign = row.querySelector('.assignee-btn.assign');
+  const btnCancel = row.querySelector('.assignee-btn.cancel');
+  if(btn.classList.contains('assign')){
+    assignCar(carId, inputEl.value.trim(), statusEl, btnAssign, btnCancel);
+  } else if(btn.classList.contains('cancel')){
+    cancelAssign(carId, inputEl, statusEl, btnAssign, btnCancel);
+  }
+}
+
+function handleAssigneeKeydown(e){
+  if(e.key !== 'Enter' || !e.target.classList.contains('assignee-input')) return;
+  const row = e.target.closest('.assignee-row');
+  const carId = e.target.dataset.carId;
+  const statusEl = row.querySelector('.assignee-status');
+  const btnAssign = row.querySelector('.assignee-btn.assign');
+  const btnCancel = row.querySelector('.assignee-btn.cancel');
+  assignCar(carId, e.target.value.trim(), statusEl, btnAssign, btnCancel);
+}
+
+['listStrong', 'listNormal'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('click', handleAssigneeListClick);
+  el.addEventListener('keydown', handleAssigneeKeydown);
+});
 
 document.querySelectorAll('.tab-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
@@ -308,7 +434,7 @@ document.querySelectorAll('.sort-group').forEach(group=>{
   });
 });
 
-render();
+init();
 </script>
 </body>
 </html>
