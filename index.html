@@ -234,6 +234,17 @@
            alter table assignments enable row level security;
            create policy "allow all (test)" on assignments
              for all using (true) with check (true);
+
+           create table assignment_logs (
+             id bigint generated always as identity primary key,
+             car_id text not null,
+             assignee text,
+             action text not null check (action in ('assign','cancel')),
+             created_at timestamptz default now()
+           );
+           alter table assignment_logs enable row level security;
+           create policy "allow all (test)" on assignment_logs
+             for all using (true) with check (true);
        → Project Settings → API 에서 URL과 anon public 키 복사
      - 이 스크립트 태그와 아래 모듈 블록만 지우면 원래 페이지로 완전히 되돌아갑니다.
      ========================================================= -->
@@ -270,6 +281,16 @@ async function loadAssignees(){
   (data || []).forEach(row => { if(row.assignee) assigneeMap[row.car_id] = row.assignee; });
 }
 
+// 할당/취소가 일어날 때마다 assignment_logs 테이블에 이력을 한 줄씩 쌓습니다.
+// (assignments 테이블은 "현재 상태"만 담당해서 upsert/delete로 덮어써지므로,
+//  "누가 언제 어떤 차량을 할당했는지"는 별도 로그 테이블에 insert로만 쌓아야 남습니다.)
+async function logAssignment(carId, assignee, action){
+  if(!supabaseClient) return;
+  const { error } = await supabaseClient.from('assignment_logs')
+    .insert({ car_id: carId, assignee, action });
+  if(error) console.error('로그 기록 실패:', error);
+}
+
 async function assignCar(carId, name, statusEl, btnAssign, btnCancel){
   if(!supabaseClient){ if(statusEl) statusEl.textContent = '⚠️ Supabase 설정 필요'; return; }
   if(!name){ if(statusEl) statusEl.textContent = '이름을 입력하세요'; return; }
@@ -283,10 +304,12 @@ async function assignCar(carId, name, statusEl, btnAssign, btnCancel){
   if(error){ console.error(error); if(statusEl) statusEl.textContent = '실패 — 콘솔 확인'; return; }
   assigneeMap[carId] = name;
   if(statusEl) statusEl.textContent = `담당: ${name}`;
+  logAssignment(carId, name, 'assign');
 }
 
 async function cancelAssign(carId, inputEl, statusEl, btnAssign, btnCancel){
   if(!supabaseClient){ if(statusEl) statusEl.textContent = '⚠️ Supabase 설정 필요'; return; }
+  const prevAssignee = assigneeMap[carId] || null;
   if(btnAssign) btnAssign.disabled = true;
   if(btnCancel) btnCancel.disabled = true;
   if(statusEl) statusEl.textContent = '취소 중...';
@@ -297,6 +320,7 @@ async function cancelAssign(carId, inputEl, statusEl, btnAssign, btnCancel){
   delete assigneeMap[carId];
   if(inputEl) inputEl.value = '';
   if(statusEl) statusEl.textContent = '미배정';
+  logAssignment(carId, prevAssignee, 'cancel');
 }
 
 const sortState = { strong: 'gap', normal: 'gap' };
